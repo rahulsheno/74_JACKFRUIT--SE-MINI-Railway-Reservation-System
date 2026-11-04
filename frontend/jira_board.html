@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Agile Scrum Board - Railway Reservation System (RRS)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --jira-blue: #0052cc;
+            --jira-dark: #172b4d;
+            --jira-bg: #f4f5f7;
+            --jira-card: #ffffff;
+            --jira-border: #dfe1e6;
+            --jira-text: #172b4d;
+            --jira-subtext: #5e6c84;
+            --done-green: #36b37e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--jira-bg); color: var(--jira-text); min-height: 100vh; }
+
+        /* Jira Navigation Header */
+        .jira-nav {
+            background: var(--jira-blue);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .jira-brand { display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.1rem; }
+        .jira-brand svg { width: 22px; height: 22px; fill: white; }
+        .jira-menu { display: flex; gap: 1.25rem; font-size: 0.9rem; align-items: center; }
+        .jira-menu span { cursor: pointer; opacity: 0.9; }
+        .jira-menu span.active { font-weight: 600; opacity: 1; border-bottom: 2px solid white; padding-bottom: 2px; }
+
+        /* Project Subheader */
+        .project-header {
+            background: white;
+            padding: 1.25rem 2rem;
+            border-bottom: 1px solid var(--jira-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .project-title h1 { font-size: 1.5rem; color: var(--jira-dark); margin-bottom: 0.25rem; }
+        .project-meta { font-size: 0.85rem; color: var(--jira-subtext); display: flex; gap: 1.5rem; }
+        .sprint-badge { background: #ebecf0; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600; color: #42526e; }
+
+        .team-avatars { display: flex; align-items: center; gap: 0.5rem; }
+        .avatar {
+            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; color: white; font-weight: 700; font-size: 0.8rem;
+            box-shadow: 0 0 0 2px white;
+        }
+        .av-sabbir { background: #ff5630; }
+        .av-samvit { background: #00b8d9; }
+        .av-vinayak { background: #6554c0; }
+        .av-rahul { background: #36b37e; }
+
+        /* Board Container */
+        .board-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            padding: 1.5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .column {
+            background: #ebecf0;
+            border-radius: 6px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 80vh;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--jira-subtext);
+            text-transform: uppercase;
+            padding: 0.5rem 0.25rem 0.75rem;
+        }
+
+        .issue-count {
+            background: #dfe1e6;
+            color: #42526e;
+            padding: 0.1rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        .card-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+        /* Jira Card Style */
+        .jira-card {
+            background: white;
+            border-radius: 4px;
+            padding: 0.75rem 0.9rem;
+            box-shadow: 0 1px 2px rgba(9, 30, 66, 0.25);
+            border-left: 4px solid var(--jira-blue);
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: pointer;
+        }
+        .jira-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(9, 30, 66, 0.2); }
+        .jira-card.done { border-left-color: var(--done-green); }
+
+        .card-title { font-size: 0.9rem; font-weight: 500; color: var(--jira-dark); margin-bottom: 0.6rem; line-height: 1.35; }
+        .card-tags { display: flex; gap: 0.4rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+        .tag { font-size: 0.7rem; padding: 0.15rem 0.45rem; border-radius: 3px; font-weight: 600; }
+        .tag-sabbir { background: #ffebe6; color: #de350b; }
+        .tag-samvit { background: #e6fcff; color: #008da6; }
+        .tag-vinayak { background: #eae6ff; color: #5243aa; }
+        .tag-rahul { background: #e3fcef; color: #006644; }
+
+        .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--jira-subtext); }
+        .issue-key { font-weight: 700; color: #42526e; display: flex; align-items: center; gap: 0.3rem; }
+        .points-badge { background: #dfe1e6; color: #172b4d; padding: 0.1rem 0.4rem; border-radius: 8px; font-weight: 700; font-size: 0.7rem; }
+    </style>
+</head>
+<body>
+    <header class="jira-nav">
+        <div class="jira-brand">
+            <svg viewBox="0 0 24 24"><path d="M11.53 2c0 2.4 1.97 4.35 4.4 4.35h1.78v1.7c0 2.4 1.94 4.34 4.35 4.35V2h-10.53zm-4.4 5.95c0 2.4 1.97 4.35 4.4 4.35h1.78v1.7c0 2.4 1.94 4.35 4.35 4.35V7.95H7.13zm-4.4 5.95c0 2.4 1.97 4.35 4.4 4.35h1.78v1.7c0 2.4 1.94 4.35 4.35 4.35V13.9H2.73z"/></svg>
+            <span>Jira Software</span>
+        </div>
+        <div class="jira-menu">
+            <span class="active">Projects</span>
+            <span>Filters</span>
+            <span>Dashboards</span>
+            <span>Teams</span>
+            <span>Apps (GitHub Connected)</span>
+        </div>
+    </header>
+
+    <div class="project-header">
+        <div class="project-title">
+            <h1>Railway Reservation System (RRS)</h1>
+            <div class="project-meta">
+                <span><strong>Sprint:</strong> <span class="sprint-badge">Sprint 1 - Core Implementation (Completed)</span></span>
+                <span><strong>Methodology:</strong> Agile Scrum</span>
+                <span><strong>Total Velocity:</strong> 48 Story Points</span>
+            </div>
+        </div>
+        <div class="team-avatars">
+            <div class="avatar av-sabbir" title="Sabbir Mondal (Train Catalog)">SM</div>
+            <div class="avatar av-samvit" title="Samvit Atur (Seat Engine)">SA</div>
+            <div class="avatar av-vinayak" title="Vinayak Kalal (Fare Engine)">VK</div>
+            <div class="avatar av-rahul" title="Rahul Shenoy (Lead & Booking)">RS</div>
+        </div>
+    </div>
+
+    <main class="board-container">
+        <!-- TO DO -->
+        <div class="column">
+            <div class="column-header">
+                <span>To Do</span>
+                <span class="issue-count">0</span>
+            </div>
+            <div class="card-list">
+                <!-- Empty: All tasks pulled into sprint -->
+            </div>
+        </div>
+
+        <!-- IN PROGRESS -->
+        <div class="column">
+            <div class="column-header">
+                <span>In Progress</span>
+                <span class="issue-count">0</span>
+            </div>
+            <div class="card-list">
+                <!-- Empty: All merged & tested -->
+            </div>
+        </div>
+
+        <!-- DONE -->
+        <div class="column">
+            <div class="column-header">
+                <span>Done</span>
+                <span class="issue-count">16</span>
+            </div>
+            <div class="card-list">
+                <!-- Sabbir (RRS-1 to RRS-4) -->
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-sabbir">Sabbir Mondal</span></div>
+                    <div class="card-title">RRS-1: Train search by station and travel date with directional check</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-1</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-sabbir">Sabbir Mondal</span></div>
+                    <div class="card-title">RRS-2: Station graph, intermediate halt schedule and distance query</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-2</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-sabbir">Sabbir Mondal</span></div>
+                    <div class="card-title">RRS-3: External Railway API live status simulation and caching</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-3</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-sabbir">Sabbir Mondal</span></div>
+                    <div class="card-title">RRS-4: Unit tests for train catalog and route search (10/10 PASS)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-4</span>
+                        <span class="points-badge">2 pts</span>
+                    </div>
+                </div>
+
+                <!-- Samvit (RRS-5 to RRS-8) -->
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-samvit">Samvit Atur</span></div>
+                    <div class="card-title">RRS-5: Interactive 2D coach visualizer (1A, 2A, 3A, SL)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-5</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-samvit">Samvit Atur</span></div>
+                    <div class="card-title">RRS-6: Berth preference auto-allocation (Lower/Upper/Middle)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-6</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-samvit">Samvit Atur</span></div>
+                    <div class="card-title">RRS-7: 5-minute atomic concurrency seat locking mechanism</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-7</span>
+                        <span class="points-badge">5 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-samvit">Samvit Atur</span></div>
+                    <div class="card-title">RRS-8: Unit tests for coach layout and seat locking (10/10 PASS)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-8</span>
+                        <span class="points-badge">2 pts</span>
+                    </div>
+                </div>
+
+                <!-- Vinayak (RRS-9 to RRS-12) -->
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-vinayak">Vinayak Kalal</span></div>
+                    <div class="card-title">RRS-9: Dynamic distance-based base fare computation + 5% GST</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-9</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-vinayak">Vinayak Kalal</span></div>
+                    <div class="card-title">RRS-10: Concession policies (Senior Citizen, Student, Divyangjan)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-10</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-vinayak">Vinayak Kalal</span></div>
+                    <div class="card-title">RRS-11: IRCTC tiered cancellation refund matrix and payment simulation</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-11</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-vinayak">Vinayak Kalal</span></div>
+                    <div class="card-title">RRS-12: Unit tests for fare calculations and concessions (10/10 PASS)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-12</span>
+                        <span class="points-badge">2 pts</span>
+                    </div>
+                </div>
+
+                <!-- Rahul (RRS-13 to RRS-16) -->
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-rahul">Rahul Shenoy</span></div>
+                    <div class="card-title">RRS-13: 10-digit CRIS-compliant PNR generation and status tracker</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-13</span>
+                        <span class="points-badge">5 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-rahul">Rahul Shenoy</span></div>
+                    <div class="card-title">RRS-14: Cascade auto-promotion engine (WL -> RAC -> Confirmed)</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-14</span>
+                        <span class="points-badge">5 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-rahul">Rahul Shenoy</span></div>
+                    <div class="card-title">RRS-15: Unified FastAPI server and interactive web frontend</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-15</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+
+                <div class="jira-card done">
+                    <div class="card-tags"><span class="tag tag-rahul">Rahul Shenoy</span></div>
+                    <div class="card-title">RRS-16: CI/CD GitHub Actions, Docker container, and SDLC docs</div>
+                    <div class="card-footer">
+                        <span class="issue-key">🟢 RRS-16</span>
+                        <span class="points-badge">3 pts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
