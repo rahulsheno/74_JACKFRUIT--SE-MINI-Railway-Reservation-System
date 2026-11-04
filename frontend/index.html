@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Railway Ticket Reservation System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">🚆</span>
+                <div>
+                    <h1>IRCTC Express</h1>
+                    <p class="subtitle">SE Mini-Project 2026 • Topic 74</p>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <button class="nav-btn active" onclick="switchTab('search-tab')">Train Search</button>
+                <button class="nav-btn" onclick="switchTab('seat-tab')">Seat Selector</button>
+                <button class="nav-btn" onclick="switchTab('booking-tab')">Book Ticket</button>
+                <button class="nav-btn" onclick="switchTab('pnr-tab')">PNR Status</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 1. SEARCH TAB (Sabbir) -->
+        <section id="search-tab" class="tab-content active">
+            <div class="card">
+                <h2>🔍 Search Trains Between Stations</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Origin Station</label>
+                        <select id="srcStation">
+                            <option value="SBC">KSR Bengaluru City (SBC)</option>
+                            <option value="MAS">Chennai Central (MAS)</option>
+                            <option value="NDLS">New Delhi (NDLS)</option>
+                            <option value="HWH">Howrah Junction (HWH)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Destination Station</label>
+                        <select id="dstStation">
+                            <option value="MAS">Chennai Central (MAS)</option>
+                            <option value="SBC">KSR Bengaluru City (SBC)</option>
+                            <option value="NDLS">New Delhi (NDLS)</option>
+                            <option value="HWH">Howrah Junction (HWH)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Travel Date</label>
+                        <input type="date" id="travelDate" value="2026-11-20">
+                    </div>
+                    <div class="input-group action-align">
+                        <button class="btn btn-primary" onclick="searchTrains()">Find Trains</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="trainResults" class="results-list"></div>
+        </section>
+
+        <!-- 2. SEAT SELECTOR TAB (Samvit) -->
+        <section id="seat-tab" class="tab-content">
+            <div class="card">
+                <h2>💺 Interactive Coach Berth Layout</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Select Train</label>
+                        <select id="seatTrainNum">
+                            <option value="12658">12658 - Bengaluru Chennai Mail</option>
+                            <option value="22691">22691 - Bengaluru Rajdhani</option>
+                            <option value="12028">12028 - Shatabdi Express</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Coach Class</label>
+                        <select id="seatClass">
+                            <option value="SL">Sleeper (SL)</option>
+                            <option value="3A">AC 3-Tier (3A)</option>
+                            <option value="2A">AC 2-Tier (2A)</option>
+                            <option value="1A">AC First Class (1A)</option>
+                        </select>
+                    </div>
+                    <div class="input-group action-align">
+                        <button class="btn btn-secondary" onclick="loadCoachLayout()">Load Coach Layout</button>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <span class="legend-item"><span class="badge available"></span> Available</span>
+                    <span class="legend-item"><span class="badge locked"></span> Locked (In Checkout)</span>
+                    <span class="legend-item"><span class="badge booked"></span> Booked</span>
+                </div>
+
+                <div id="coachContainer" class="coach-grid"></div>
+            </div>
+        </section>
+
+        <!-- 3. BOOKING TAB (Vinayak & Rahul) -->
+        <section id="booking-tab" class="tab-content">
+            <div class="card">
+                <h2>🎫 Book Railway Ticket</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Passenger Name</label>
+                        <input type="text" id="pName" placeholder="Enter Full Name" value="Ravi Kumar">
+                    </div>
+                    <div class="input-group">
+                        <label>Age</label>
+                        <input type="number" id="pAge" value="28">
+                    </div>
+                    <div class="input-group">
+                        <label>Berth Preference</label>
+                        <select id="pPref">
+                            <option value="Lower">Lower Berth</option>
+                            <option value="Middle">Middle Berth</option>
+                            <option value="Upper">Upper Berth</option>
+                            <option value="Side Lower">Side Lower</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Concession Category</label>
+                        <select id="pConcession" onchange="updateFarePreview()">
+                            <option value="NONE">General (No Concession)</option>
+                            <option value="SENIOR_CITIZEN_MALE">Senior Citizen Male (40% off)</option>
+                            <option value="SENIOR_CITIZEN_FEMALE">Senior Citizen Female (50% off)</option>
+                            <option value="STUDENT">Student Pass (50% off)</option>
+                            <option value="DIVYANGJAN">Divyangjan / PwD (75% off)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="fare-preview-box" id="fareBox">
+                    <h3>Estimated Fare Breakdown</h3>
+                    <div class="fare-row"><span>Base Fare:</span> <strong id="fbBase">₹162.00</strong></div>
+                    <div class="fare-row"><span>Discount:</span> <strong id="fbDisc">-₹0.00</strong></div>
+                    <div class="fare-row"><span>Superfast + GST:</span> <strong id="fbTax">₹30.00</strong></div>
+                    <hr>
+                    <div class="fare-row total"><span>Total Payable:</span> <strong id="fbTotal">₹192.00</strong></div>
+                </div>
+
+                <button class="btn btn-success" style="margin-top: 1.5rem;" onclick="executeBooking()">Pay & Confirm Booking</button>
+            </div>
+        </section>
+
+        <!-- 4. PNR STATUS TAB (Rahul) -->
+        <section id="pnr-tab" class="tab-content">
+            <div class="card">
+                <h2>🔎 PNR Status & Ticket Cancellation</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Enter 10-Digit PNR</label>
+                        <input type="text" id="pnrInput" placeholder="e.g. 4239845721" maxlength="10">
+                    </div>
+                    <div class="input-group action-align">
+                        <button class="btn btn-primary" onclick="checkPnrStatus()">Check Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="pnrResultCard" class="card" style="display:none; margin-top: 1.5rem;"></div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
