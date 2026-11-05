@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 import os
 
 from backend.src.train_service.catalog import TrainCatalogService
@@ -107,6 +107,13 @@ def get_live_gps_tracking(train_number: str):
         raise HTTPException(status_code=404, detail="Train GPS tracking telemetry unavailable")
     return tracking
 
+@app.get("/api/trains/{train_number}/running-status", tags=["Train Catalog - Sabbir"])
+def get_live_running_status(train_number: str):
+    status = catalog_service.get_live_running_status(train_number)
+    if not status or status.get("status") == "ERROR":
+        raise HTTPException(status_code=404, detail="Train live running status unavailable")
+    return status
+
 # ----------------- 2. SEAT LAYOUT & LOCKING (SAMVIT) -----------------
 @app.get("/api/seats/layout", tags=["Seat Allocation Engine - Samvit"])
 def get_coach_layout(train_number: str, journey_date: str, coach_class: str):
@@ -142,6 +149,13 @@ def renew_seat_lock(req: SeatRenewRequest):
     if not ok:
         raise HTTPException(status_code=400, detail=msg)
     return {"status": "SUCCESS", "message": msg}
+
+@app.get("/api/trains/{train_number}/occupancy", tags=["Seat Allocation Engine - Samvit"])
+def get_coach_occupancy(train_number: str, journey_date: str = "2026-11-09"):
+    res = seat_engine.get_coach_occupancy_breakdown(train_number, journey_date)
+    if not res or res.get("status") == "ERROR":
+        raise HTTPException(status_code=404, detail="Coach occupancy breakdown unavailable")
+    return res
 
 # ----------------- 3. FARE CALCULATION & CONCESSIONS (VINAYAK) -----------------
 @app.get("/api/fare/calculate", tags=["Fare Engine - Vinayak"])
@@ -180,6 +194,13 @@ def estimate_cancellation_refund(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/fare/eticket-invoice", tags=["Fare Engine - Vinayak"])
+def generate_eticket_invoice(payload: Dict[str, Any]):
+    res = fare_calculator.generate_eticket_tax_invoice(payload)
+    if not res or res.get("status") == "ERROR":
+        raise HTTPException(status_code=400, detail="Unable to generate tax invoice")
+    return res
 
 # ----------------- 4. BOOKING LIFECYCLE & PNR TRACKING (RAHUL) -----------------
 @app.post("/api/bookings", tags=["Booking Lifecycle - Rahul"])

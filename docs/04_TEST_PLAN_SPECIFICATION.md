@@ -5,16 +5,16 @@
 ---
 
 ## 1. Overview & Test Strategy
-- Total Automated Test Cases: **74 Unit, Component & API Integration Tests** across all 4 student modules.
+- Total Automated Test Cases: **84 Unit, Component & API Integration Tests** across all 4 student modules.
 - Framework: `pytest`
 - Execution: Automated in CI/CD pipeline via GitHub Actions on every Pull Request and merge to `main`.
-- Pass Rate: **100% (74/74 Passed)**.
+- Pass Rate: **100% (84/84 Passed)**.
 
 ---
 
 ## 2. Test Cases Table (As per Course Template)
 
-### Member 1: Sabbir Mondal (Train Catalog & Railway API - 15 Tests)
+### Member 1: Sabbir Mondal (Train Catalog & Railway API - 17 Tests)
 | Test Case ID | Name of Module | Test Case Description | Pre-conditions | Test Steps | Test Data | Expected Result | Test Result |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `TC_SABBIR_01` | Train Service | Retrieve all registered stations | Catalog loaded | Call `get_all_stations()` | None | Count >= 5 stations | **PASS** |
@@ -32,8 +32,10 @@
 | `TC_SABBIR_13` | Train Service | Invalid station facilities | Bad code | Call `get_station_facilities('BAD')` | Bad code | Returns None | **PASS** |
 | `TC_SABBIR_14` | Train Service | Live satellite GPS telemetry | Valid train | Call `get_live_gps_tracking('12658')` | Train: 12658 | Returns coordinates, speed, heading | **PASS** |
 | `TC_SABBIR_15` | Train Service | GPS telemetry invalid train | Invalid train | Call `get_live_gps_tracking('00000')` | Train: 00000 | Returns ERROR status | **PASS** |
+| `TC_SABBIR_16` | Train Service | Station-by-station running status | Catalog loaded | Call `get_live_running_status('12658')` | Train: 12658 | Station delays & platforms | **PASS** |
+| `TC_SABBIR_17` | Train Service | Running status invalid train | Bad input | Call `get_live_running_status('999999')` | Bad number | Status: ERROR response | **PASS** |
 
-### Member 2: Samvit Atur (Seat Layout & Concurrency Locks - 15 Tests)
+### Member 2: Samvit Atur (Seat Layout & Concurrency Locks - 17 Tests)
 | Test Case ID | Name of Module | Test Case Description | Pre-conditions | Test Steps | Test Data | Expected Result | Test Result |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `TC_SAMVIT_01` | Seat Engine | Generate Sleeper coach layout | SL Class | Call `generate_coach_berths('SL', 'SL-1')` | Capacity: 16 | 16 berths with Lower/Middle/Upper | **PASS** |
@@ -51,8 +53,10 @@
 | `TC_SAMVIT_13` | Seat Engine | Heartbeat lock renewal | Active lock | Call `renew_seat_lock(lock_id)` | Valid lock | Extends lock by 5 minutes | **PASS** |
 | `TC_SAMVIT_14` | Seat Engine | Renew invalid or unauthorized lock | Expired/Bad user | Call with bad lock id | Invalid id | Returns False | **PASS** |
 | `TC_SAMVIT_15` | Seat Engine | Coach availability summary | Inventory ready | Call `get_seat_availability_summary()` | Class: 3A | Returns counts and status text | **PASS** |
+| `TC_SAMVIT_16` | Seat Engine | Coach occupancy breakdown | Train exists | Call `get_coach_occupancy_breakdown('12658')` | Train: 12658 | Returns class percentages & totals | **PASS** |
+| `TC_SAMVIT_17` | Seat Engine | Occupancy breakdown invalid train | Invalid train | Call with bad train number | Bad number | Returns ERROR status | **PASS** |
 
-### Member 3: Vinayak Kalal (Fare Engine & Concessions - 15 Tests)
+### Member 3: Vinayak Kalal (Fare Engine & Concessions - 18 Tests)
 | Test Case ID | Name of Module | Test Case Description | Pre-conditions | Test Steps | Test Data | Expected Result | Test Result |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `TC_VINAYAK_01` | Fare Engine | Calculate Sleeper base fare | Dist: 360km | Call `calculate_fare(360, 'SL')` | 360km, SL | Total: ₹192 (no GST) | **PASS** |
@@ -70,8 +74,11 @@
 | `TC_VINAYAK_13` | Fare Engine | Refund 48 to 12 hours prior | 24h prior | Call with hours = 24 | Paid: 1200 | 25% deduction, refund ₹900 | **PASS** |
 | `TC_VINAYAK_14` | Fare Engine | Refund 12 to 4 hours prior | 6h prior | Call with hours = 6 | Paid: 1200 | 50% deduction, refund ₹600 | **PASS** |
 | `TC_VINAYAK_15` | Fare Engine | WL/RAC flat clerkage refund & QR | WL status | Call with status='WL' | Paid: 500 | Flat ₹60 deduction, refund ₹440 | **PASS** |
+| `TC_VINAYAK_16` | Fare Engine | Peak holiday surcharge calendar | Calendar loaded| Check `FESTIVAL_DATES` | Peak dates | Includes Christmas/New Year | **PASS** |
+| `TC_VINAYAK_17` | Fare Engine | IRCTC GST Tax Invoice (AC 5% GST)| AC Class | Call `generate_eticket_tax_invoice()` | 3A Class | Generates SAC 9964, CGST/SGST | **PASS** |
+| `TC_VINAYAK_18` | Fare Engine | IRCTC Tax Invoice (Sleeper 0% GST)| SL Class | Call `generate_eticket_tax_invoice()` | SL Class | 0% GST exemption applied | **PASS** |
 
-### Member 4: Rahul Shenoy (Booking Lifecycle, Integration & DevOps - 29 Tests)
+### Member 4: Rahul Shenoy (Booking Lifecycle, Integration & DevOps - 32 Tests)
 | Test Case ID | Name of Module | Test Case Description | Pre-conditions | Test Steps | Test Data | Expected Result | Test Result |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | `TC_LEAD_01` | Booking Lifecycle | End-to-end confirmed booking | Seats free | Call `book_ticket()` | SBC->MAS, 3A | 10-digit PNR, Status CNF | **PASS** |
@@ -84,4 +91,4 @@
 | `TC_LEAD_08` | Booking Lifecycle | Cancel ticket & calculate refund | Confirmed ticket| Call `cancel_ticket(pnr, 50.0)` | Valid PNR | Status CANCELLED, refund issued | **PASS** |
 | `TC_LEAD_09` | Booking Lifecycle | Reject duplicate cancellation | Already cancel | Call `cancel_ticket(pnr)` twice | Cancelled PNR | Raises ValueError | **PASS** |
 | `TC_LEAD_10` | Booking Lifecycle | Cascade Auto-Promotion (RAC->CNF) | RAC passenger | Cancel 1st CNF ticket | Confirmed PNR | RAC passenger upgraded to CNF | **PASS** |
-| `TC_API_01` to `19` | Unified REST API | Integration tests for all endpoints | FastAPI Server | HTTP GET/POST via TestClient | 19 API Routes | All HTTP 200/400 verified | **PASS** |
+| `TC_API_01` to `22` | Unified REST API | Integration tests for all endpoints | FastAPI Server | HTTP GET/POST via TestClient | 22 API Routes | All HTTP 200/400 verified | **PASS** |

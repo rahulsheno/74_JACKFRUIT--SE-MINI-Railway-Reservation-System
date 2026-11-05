@@ -235,3 +235,33 @@ def test_api_refund_estimate(client):
     data = res.json()
     assert data['cancellation_charge'] == 250.0
     assert data['refund_amount'] == 750.0
+
+
+def test_api_live_running_status(client):
+    res = client.get('/api/trains/12658/running-status')
+    assert res.status_code == 200
+    data = res.json()
+    assert data['status'] == 'SUCCESS'
+    assert 'station_status' in data
+
+def test_api_coach_occupancy(client):
+    res = client.get('/api/trains/12658/occupancy?journey_date=2026-12-10')
+    assert res.status_code == 200
+    data = res.json()
+    assert data['status'] == 'SUCCESS'
+    assert 'overall_occupancy_pct' in data
+
+def test_api_eticket_invoice(client):
+    payload = {
+        'pnr': 'PNR998877665',
+        'train_number': '12658',
+        'coach_class': '2A',
+        'fare_summary': {'total_fare': 1500.0},
+        'passengers': [{'name': 'Vikram', 'age': 40}]
+    }
+    res = client.post('/api/fare/eticket-invoice', json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data['status'] == 'SUCCESS'
+    assert data['sac_code'] == '9964'
+    assert data['itemized_charges']['grand_total'] > 1500.0

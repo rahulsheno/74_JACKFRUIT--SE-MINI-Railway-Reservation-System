@@ -155,6 +155,12 @@ async function searchTrains() {
                         <button class="btn btn-outline btn-sm" onclick="viewGpsRadar('${t.train_number}')">
                             🛰️ Live Radar
                         </button>
+                        <button class="btn btn-outline btn-sm" onclick="viewRunningStatus('${t.train_number}')">
+                            ⏱️ Delays
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="viewOccupancyRadar('${t.train_number}')">
+                            📊 Occupancy
+                        </button>
                         <button class="btn btn-outline btn-sm" style="color:var(--primary); font-weight:600;" onclick="viewCoachForTrain('${t.train_number}', '${t.available_classes[0]}', '${date}')">
                             💺 2D Coach
                         </button>
@@ -913,7 +919,10 @@ async function checkPnrStatus(explicitPnr = null) {
                 ` : ''}
 
                 <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:1rem;">
-                    <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Save E-Ticket</button>
+                    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                        <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Save E-Ticket</button>
+                        <button class="btn btn-outline" style="color:var(--primary); font-weight:600;" onclick="viewTaxInvoice('${b.pnr}', '${b.train_number}', '${b.coach_class}', ${b.total_fare})">🧾 View GST Tax Invoice</button>
+                    </div>
                     ${b.booking_status !== 'CANCELLED' ? `
                         <button class="btn btn-danger" onclick="openCancelModal('${b.pnr}', ${b.total_fare}, '${b.coach_class}')">
                             ✕ Cancel Ticket & Claim Refund
@@ -1015,4 +1024,207 @@ function loadRecentPnrs() {
     } else {
         container.style.display = 'none';
     }
+}
+
+
+// ----------------- 6. LIVE RUNNING TIMETABLE & DELAYS (SABBIR) -----------------
+async function viewRunningStatus(trainNumber) {
+    const modal = document.getElementById('runningStatusModal');
+    const body = document.getElementById('runningStatusBody');
+    const title = document.getElementById('runningStatusTrainTitle');
+    title.innerText = '⏱️ Running Status: Train ' + trainNumber;
+    body.innerHTML = '<p>Fetching live NTES delay telemetry...</p>';
+    modal.classList.add('active');
+
+    try {
+        const res = await fetch(`${API_BASE}/api/trains/${trainNumber}/running-status`);
+        if (!res.ok) throw new Error('Live running data unavailable');
+        const data = await res.json();
+
+        body.innerHTML = `
+            <div style="background:#ebf8ff; border:1px solid #bee3f8; border-radius:8px; padding:0.85rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong>${data.train_name}</strong>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Current Location: <strong>${data.current_location}</strong></div>
+                </div>
+                <div style="text-align:right;">
+                    <span class="status-badge ${data.overall_delay_minutes > 0 ? 'PARTIAL' : 'CONFIRMED'}">
+                        ${data.overall_delay_minutes === 0 ? 'ON TIME' : `${data.overall_delay_minutes} min late`}
+                    </span>
+                </div>
+            </div>
+
+            <div style="max-height:300px; overflow-y:auto;">
+                <table class="passenger-table">
+                    <thead>
+                        <tr>
+                            <th>Station</th>
+                            <th>Platform</th>
+                            <th>Sch. Dep</th>
+                            <th>Delay</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.station_status.map(s => `
+                            <tr>
+                                <td><strong>${s.station_code}</strong></td>
+                                <td>Pf ${s.platform}</td>
+                                <td>${s.scheduled_departure}</td>
+                                <td><span style="color:${s.delay_minutes > 0 ? '#c53030' : '#276749'}; font-weight:600;">+${s.delay_minutes}m</span></td>
+                                <td><span class="status-badge ${s.status === 'DEPARTED' ? 'CANCELLED' : (s.status === 'ARRIVED' ? 'CONFIRMED' : 'PARTIAL')}" style="font-size:0.75rem;">${s.status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (e) {
+        body.innerHTML = `<p style="color:red">Unable to retrieve live running status: ${e.message}</p>`;
+    }
+}
+
+function closeRunningStatusModal() {
+    document.getElementById('runningStatusModal').classList.remove('active');
+}
+
+// ----------------- 7. COACH OCCUPANCY RADAR (SAMVIT) -----------------
+async function viewOccupancyRadar(trainNumber) {
+    const modal = document.getElementById('occupancyModal');
+    const body = document.getElementById('occupancyModalBody');
+    const title = document.getElementById('occupancyTrainTitle');
+    title.innerText = '📊 Coach Occupancy: Train ' + trainNumber;
+    body.innerHTML = '<p>Computing live inventory capacity metrics...</p>';
+    modal.classList.add('active');
+
+    try {
+        const res = await fetch(`${API_BASE}/api/trains/${trainNumber}/occupancy`);
+        if (!res.ok) throw new Error('Occupancy metrics unavailable');
+        const data = await res.json();
+
+        body.innerHTML = `
+            <div style="background:#f7fafc; border:1px solid var(--border); border-radius:8px; padding:0.85rem; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span>Overall Capacity Utilization:</span>
+                    <strong style="color:var(--primary);">${data.overall_occupancy_pct}% (${data.overall_booked}/${data.overall_capacity} seats)</strong>
+                </div>
+                <div style="width:100%; height:10px; background:#edf2f7; border-radius:5px; overflow:hidden;">
+                    <div style="width:${Math.min(100, data.overall_occupancy_pct)}%; height:100%; background:var(--primary);"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                ${data.class_breakdown.map(c => `
+                    <div style="border:1px solid var(--border); border-radius:8px; padding:0.75rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <span style="font-weight:700;">Class ${c.coach_class}</span>
+                            <span style="font-size:0.85rem; color:var(--text-muted);">${c.available} available / ${c.total_seats} total</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:0.3rem;">
+                            <span>RAC: ${c.rac_count} | WL: ${c.wl_count}</span>
+                            <span style="font-weight:600; color:${c.occupancy_rate_pct > 80 ? '#c53030' : '#276749'}">${c.occupancy_rate_pct}% Booked</span>
+                        </div>
+                        <div style="width:100%; height:8px; background:#edf2f7; border-radius:4px; overflow:hidden;">
+                            <div style="width:${Math.min(100, c.occupancy_rate_pct)}%; height:100%; background:${c.occupancy_rate_pct > 80 ? '#e53e3e' : '#319795'};"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } catch (e) {
+        body.innerHTML = `<p style="color:red">Unable to load coach occupancy: ${e.message}</p>`;
+    }
+}
+
+function closeOccupancyModal() {
+    document.getElementById('occupancyModal').classList.remove('active');
+}
+
+// ----------------- 8. OFFICIAL CRIS GST TAX INVOICE (VINAYAK) -----------------
+async function viewTaxInvoice(pnr, trainNumber, coachClass, totalFare) {
+    const modal = document.getElementById('taxInvoiceModal');
+    const body = document.getElementById('taxInvoiceBody');
+    body.innerHTML = '<p>Generating official CRIS GST tax invoice...</p>';
+    modal.classList.add('active');
+
+    try {
+        const payload = {
+            pnr: pnr,
+            train_number: trainNumber,
+            coach_class: coachClass,
+            fare_summary: { total_fare: totalFare },
+            passengers: [{ name: 'Passenger', age: 30 }]
+        };
+
+        const res = await fetch(`${API_BASE}/api/fare/eticket-invoice`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error('Invoice generation failed');
+        const inv = await res.json();
+        const ch = inv.itemized_charges;
+
+        body.innerHTML = `
+            <div style="border: 1px dashed var(--border); padding: 1rem; border-radius: 8px; background: #fff;">
+                <div style="text-align:center; border-bottom:1px solid #edf2f7; padding-bottom:0.75rem; margin-bottom:0.75rem;">
+                    <h3 style="font-size:1.1rem; color:var(--primary); margin:0;">${inv.supplier_name}</h3>
+                    <div style="font-size:0.78rem; color:var(--text-muted);">GSTIN: <strong>${inv.gstin_supplier}</strong> | SAC Code: <strong>${inv.sac_code}</strong></div>
+                    <div style="font-size:0.78rem; color:var(--text-muted);">Invoice #: <strong>${inv.invoice_number}</strong></div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem; font-size:0.85rem; margin-bottom:0.75rem;">
+                    <div>PNR: <strong>${inv.pnr}</strong></div>
+                    <div>Train: <strong>${inv.train_number}</strong></div>
+                    <div>Class: <strong>${inv.coach_class}</strong></div>
+                    <div>Category: <strong>${inv.is_ac_coach ? 'AC Class (5% GST)' : 'Non-AC (GST Exempt)'}</strong></div>
+                </div>
+
+                <table class="passenger-table" style="margin-bottom:0.75rem;">
+                    <thead>
+                        <tr>
+                            <th>Charge Description</th>
+                            <th style="text-align:right;">Amount (INR)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Base Taxable Ticket Fare</td>
+                            <td style="text-align:right;">₹${ch.base_taxable_fare.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>CGST (${(ch.gst_percentage / 2).toFixed(1)}%)</td>
+                            <td style="text-align:right;">₹${ch.cgst_amount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>SGST (${(ch.gst_percentage / 2).toFixed(1)}%)</td>
+                            <td style="text-align:right;">₹${ch.sgst_amount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>IRCTC Convenience Fee (Incl. 18% GST)</td>
+                            <td style="text-align:right;">₹${(ch.irctc_convenience_fee + ch.convenience_fee_gst).toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                            <td>Optional Travel Insurance</td>
+                            <td style="text-align:right;">₹${ch.travel_insurance.toFixed(2)}</td>
+                        </tr>
+                        <tr style="background:#f7fafc; font-weight:700;">
+                            <td>Grand Total (Paid)</td>
+                            <td style="text-align:right; color:var(--primary); font-size:1.05rem;">₹${ch.grand_total.toFixed(2)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="font-size:0.75rem; color:var(--text-muted); text-align:center;">
+                    * This is a computer-generated tax invoice issued pursuant to Section 31 of CGST Act, 2017.
+                </div>
+            </div>
+        `;
+    } catch (e) {
+        body.innerHTML = `<p style="color:red">Unable to generate invoice: ${e.message}</p>`;
+    }
+}
+
+function closeTaxInvoiceModal() {
+    document.getElementById('taxInvoiceModal').classList.remove('active');
 }

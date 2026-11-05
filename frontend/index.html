@@ -364,6 +364,52 @@
         </div>
     </div>
 
+    <!-- MODAL 6: LIVE RUNNING TIMETABLE & DELAYS (SABBIR) -->
+    <div id="runningStatusModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 600px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="runningStatusTrainTitle" style="color: var(--primary); font-size: 1.2rem;">⏱️ Live Train Running Status</h2>
+                    <span id="runningStatusChartBadge" class="status-badge status-cnf" style="font-size: 0.75rem;">Chart Prepared</span>
+                </div>
+                <button class="modal-close" onclick="closeRunningStatusModal()">&times;</button>
+            </div>
+            <div id="runningStatusBody"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 7: COACH OCCUPANCY BREAKDOWN (SAMVIT) -->
+    <div id="occupancyModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="occupancyTrainTitle" style="color: var(--primary); font-size: 1.2rem;">📊 Coach Capacity & Occupancy Radar</h2>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Real-time inventory metrics</span>
+                </div>
+                <button class="modal-close" onclick="closeOccupancyModal()">&times;</button>
+            </div>
+            <div id="occupancyModalBody"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 8: OFFICIAL CRIS GST TAX INVOICE (VINAYAK) -->
+    <div id="taxInvoiceModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 620px;">
+            <div class="modal-header">
+                <div>
+                    <h2 style="color: var(--primary); font-size: 1.2rem;">🧾 Official E-Ticket Tax Invoice</h2>
+                    <span style="font-size: 0.78rem; color: var(--text-muted);">SAC Code 9964 | CRIS IRCTC Verified</span>
+                </div>
+                <button class="modal-close" onclick="closeTaxInvoiceModal()">&times;</button>
+            </div>
+            <div id="taxInvoiceBody"></div>
+            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                <button class="btn btn-outline" onclick="window.print()">🖨️ Print Receipt</button>
+                <button class="btn btn-primary" onclick="closeTaxInvoiceModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- FLOATING TOASTS CONTAINER -->
     <div id="toastContainer" class="toast-container"></div>
 
