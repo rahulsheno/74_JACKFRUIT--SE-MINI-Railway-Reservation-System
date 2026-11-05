@@ -71,3 +71,39 @@ def test_simulate_payment(calc):
 
     res_fail = calc.simulate_payment(-100.0)
     assert res_fail["status"] == "FAILED"
+
+
+# TC_VINAYAK_11: Armed forces and defense concession
+def test_armed_forces_concession(calc):
+    fare = calc.calculate_fare(500, '3A', concession_type='ARMED_FORCES')
+    assert fare['concession_type'] == 'ARMED_FORCES'
+    assert fare['discount_amount'] > 0
+
+# TC_VINAYAK_12: Child and infant concession policies
+def test_child_and_infant_fare_policy(calc):
+    child_fare = calc.calculate_fare(400, 'SL', concession_type='CHILD_5_11')
+    assert child_fare['discount_amount'] > 0
+
+    infant_fare = calc.calculate_fare(400, 'SL', concession_type='INFANT_UNDER_5')
+    assert infant_fare['discount_amount'] == infant_fare['base_fare']
+
+# TC_VINAYAK_13: Cancellation refund tier 48 to 12 hours (25% deduction)
+def test_cancellation_refund_tier_48_to_12_hours(calc):
+    refund = calc.calculate_cancellation_refund(total_paid=1200, hours_before_departure=24, coach_class='3A')
+    assert refund['cancellation_charge'] == 300.0  # 25% of 1200
+    assert refund['refund_amount'] == 900.0
+
+# TC_VINAYAK_14: Cancellation refund tier 12 to 4 hours (50% deduction)
+def test_cancellation_refund_tier_12_to_4_hours(calc):
+    refund = calc.calculate_cancellation_refund(total_paid=1200, hours_before_departure=6, coach_class='3A')
+    assert refund['cancellation_charge'] == 600.0  # 50% of 1200
+    assert refund['refund_amount'] == 600.0
+
+# TC_VINAYAK_15: Waitlist/RAC flat clerkage refund and UPI QR payload
+def test_cancellation_refund_waitlist_clerkage(calc):
+    refund = calc.calculate_cancellation_refund(total_paid=500, hours_before_departure=1, status='WL')
+    assert refund['cancellation_charge'] == 60.0
+    assert refund['refund_amount'] == 440.0
+
+    pay = calc.simulate_payment(440.0, 'UPI')
+    assert 'upi://pay' in pay['upi_qr_payload']
