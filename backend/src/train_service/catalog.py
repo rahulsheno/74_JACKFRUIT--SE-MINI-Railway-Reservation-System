@@ -59,6 +59,42 @@ class RailwayAPIService:
             "signal_status": "GREEN"
         }
 
+    def fetch_live_running_status(self, train_number: str) -> Dict[str, Any]:
+        """
+        Simulates NTES live station-by-station running status, platform allocation, and timetable delay tracking.
+        """
+        train = next((t for t in TRAINS if t["train_number"] == train_number), None)
+        if not train:
+            return {"status": "ERROR", "message": f"Train {train_number} not found"}
+
+        halts = train["halts"]
+        running_stops = []
+        for i, h in enumerate(halts):
+            status = "DEPARTED" if i == 0 else ("ARRIVED" if i == 1 else "UPCOMING")
+            delay = 0 if i == 0 else (4 if i == 1 else 6)
+            arr_time = h.get("arr", h.get("dep", "--:--"))
+            dep_time = h.get("dep", "--:--")
+            running_stops.append({
+                "station_code": h["station_code"],
+                "scheduled_arrival": arr_time,
+                "scheduled_departure": dep_time,
+                "actual_arrival": arr_time,
+                "actual_departure": dep_time,
+                "delay_minutes": delay,
+                "platform": (i % 5) + 1,
+                "status": status
+            })
+
+        return {
+            "status": "SUCCESS",
+            "train_number": train["train_number"],
+            "train_name": train["train_name"],
+            "chart_status": "CHART PREPARED",
+            "overall_delay_minutes": 4,
+            "current_location": halts[1]["station_code"] if len(halts) > 1 else halts[0]["station_code"],
+            "station_status": running_stops
+        }
+
 class TrainCatalogService:
     """
     Train Catalog and Route Search Subsystem (Owned by Sabbir Mondal).
@@ -185,3 +221,11 @@ class TrainCatalogService:
         if not train_number:
             return None
         return self.api_service.fetch_live_gps_tracking(train_number.strip())
+
+    def get_live_running_status(self, train_number: str) -> Optional[Dict]:
+        """
+        Retrieve live station-by-station running status and timetable delays.
+        """
+        if not train_number:
+            return None
+        return self.api_service.fetch_live_running_status(train_number.strip())

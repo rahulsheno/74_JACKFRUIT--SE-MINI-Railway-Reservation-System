@@ -108,3 +108,18 @@ def test_live_gps_telemetry_valid(catalog):
 def test_live_gps_telemetry_invalid(catalog):
     gps = catalog.get_live_gps_tracking('00000')
     assert gps['status'] == 'ERROR'
+
+
+# TC_SABBIR_16: Live station-by-station running status and timetable delays
+def test_live_running_status_valid(catalog):
+    status = catalog.get_live_running_status('12658')
+    assert status['status'] == 'SUCCESS'
+    assert status['chart_status'] == 'CHART PREPARED'
+    assert len(status['station_status']) > 0
+    assert 'platform' in status['station_status'][0]
+
+# TC_SABBIR_17: Live running status with invalid train number
+def test_live_running_status_invalid(catalog):
+    status = catalog.get_live_running_status('999999')
+    assert status['status'] == 'ERROR'
+    assert catalog.get_live_running_status('') is None
