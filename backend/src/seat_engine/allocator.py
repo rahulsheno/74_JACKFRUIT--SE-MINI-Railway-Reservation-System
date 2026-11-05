@@ -1,5 +1,6 @@
 import time
 from typing import Dict, List, Optional, Tuple
+from backend.src.seat_engine.models import SeatModel, LockModel
 
 class CoachLayout:
     """
