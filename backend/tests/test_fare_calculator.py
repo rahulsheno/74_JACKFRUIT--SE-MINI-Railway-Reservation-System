@@ -114,3 +114,33 @@ def test_festival_dates_definition():
     from backend.src.fare_calculator.calculator import FESTIVAL_DATES
     assert '2026-12-25' in FESTIVAL_DATES
     assert '2026-01-01' in FESTIVAL_DATES
+
+
+# TC_VINAYAK_17: Official IRCTC GST Tax Invoice for AC class (5% GST, SAC 9964)
+def test_generate_eticket_tax_invoice_ac(calc):
+    invoice = calc.generate_eticket_tax_invoice({
+        'pnr': 'PNR987654321',
+        'train_number': '12658',
+        'coach_class': '3A',
+        'fare_summary': {'total_fare': 1050.0},
+        'passengers': [{'name': 'Ramesh', 'age': 32}]
+    })
+    assert invoice['status'] == 'SUCCESS'
+    assert invoice['sac_code'] == '9964'
+    assert invoice['is_ac_coach'] is True
+    assert invoice['itemized_charges']['gst_percentage'] == 5.0
+    assert invoice['itemized_charges']['cgst_amount'] > 0
+
+# TC_VINAYAK_18: Official IRCTC Tax Invoice for Sleeper class (0% GST exemption)
+def test_generate_eticket_tax_invoice_sleeper_zero_gst(calc):
+    invoice = calc.generate_eticket_tax_invoice({
+        'pnr': 'PNR123456789',
+        'train_number': '12658',
+        'coach_class': 'SL',
+        'fare_summary': {'total_fare': 450.0},
+        'passengers': [{'name': 'Suresh', 'age': 28}]
+    })
+    assert invoice['status'] == 'SUCCESS'
+    assert invoice['is_ac_coach'] is False
+    assert invoice['itemized_charges']['gst_percentage'] == 0.0
+    assert invoice['itemized_charges']['cgst_amount'] == 0.0

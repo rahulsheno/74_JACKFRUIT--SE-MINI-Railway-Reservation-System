@@ -21,3 +21,4 @@ class RefundEstimateModel:
     refund_amount: float
     hours_before_departure: float
     reason: str
+

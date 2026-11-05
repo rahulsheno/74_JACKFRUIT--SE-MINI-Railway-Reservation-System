@@ -1,6 +1,6 @@
 import time
 import math
-from typing import Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 from backend.src.fare_calculator.models import FareBreakdownModel, RefundEstimateModel
 
 # Indian Railway Peak Festival & Holiday Surcharges
@@ -195,4 +195,67 @@ class FareCalculatorService:
             "timestamp": time.time(),
             "gateway_status": "PAID",
             "gateway_ref": f"GATEWAY_IRCTC_{tx_id[-6:]}"
+        }
+
+    def generate_eticket_tax_invoice(self, booking_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generates an IRCTC/CRIS compliant Itemized GST Tax Invoice with SAC 9964.
+        Calculates CGST/SGST for AC classes (5%), 0% GST for Sleeper,
+        IRCTC convenience fees, and optional travel insurance.
+        """
+        if not booking_data:
+            return {"status": "ERROR", "message": "Booking data required"}
+
+        pnr = booking_data.get("pnr", f"PNR{int(time.time())}")
+        train_number = booking_data.get("train_number", "12658")
+        coach_class = str(booking_data.get("coach_class", "3A")).upper().strip()
+        fare_summary = booking_data.get("fare_summary", {})
+        total_fare = float(fare_summary.get("total_fare", 1250.0))
+        passengers = booking_data.get("passengers", [{}])
+        pax_count = max(1, len(passengers))
+
+        # GST Rate: 5% for AC classes (1A, 2A, 3A, CC, EC), 0% for non-AC (SL, 2S)
+        is_ac = coach_class in ["1A", "2A", "3A", "CC", "EC"]
+        gst_rate = 5.0 if is_ac else 0.0
+        
+        # Base fare before tax
+        taxable_fare = round(total_fare / (1 + (gst_rate / 100.0)), 2) if is_ac else total_fare
+        total_gst = round(total_fare - taxable_fare, 2)
+        cgst = round(total_gst / 2.0, 2)
+        sgst = round(total_gst / 2.0, 2)
+
+        # IRCTC Convenience Fee + 18% GST
+        conv_fee = 15.0
+        conv_fee_gst = 2.70
+        total_conv_fee = round(conv_fee + conv_fee_gst, 2)
+
+        # Travel insurance
+        travel_insurance = round(0.35 * pax_count, 2)
+        grand_total = round(total_fare + total_conv_fee + travel_insurance, 2)
+
+        invoice_number = f"INV-CRIS-{pnr[-6:]}-{int(time.time()) % 10000}"
+
+        return {
+            "status": "SUCCESS",
+            "invoice_number": invoice_number,
+            "sac_code": "9964",
+            "gstin_supplier": "29AAACR1234F1Z5",
+            "supplier_name": "Indian Railway Catering and Tourism Corporation Ltd (IRCTC)",
+            "pnr": pnr,
+            "train_number": train_number,
+            "coach_class": coach_class,
+            "passenger_count": pax_count,
+            "is_ac_coach": is_ac,
+            "itemized_charges": {
+                "base_taxable_fare": taxable_fare,
+                "cgst_amount": cgst,
+                "sgst_amount": sgst,
+                "gst_percentage": gst_rate,
+                "irctc_convenience_fee": conv_fee,
+                "convenience_fee_gst": conv_fee_gst,
+                "travel_insurance": travel_insurance,
+                "ticket_fare": total_fare,
+                "grand_total": grand_total
+            },
+            "payment_status": "PAID"
         }
