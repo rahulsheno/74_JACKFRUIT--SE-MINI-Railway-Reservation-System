@@ -3,168 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indian Railway Ticket Reservation System</title>
+    <title>IRCTC Indian Railway Ticket Reservation System</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- TOP NAVIGATION -->
     <header class="navbar">
         <div class="nav-container">
             <div class="logo">
                 <span class="logo-icon">🚆</span>
                 <div>
                     <h1>IRCTC Express</h1>
-                    <p class="subtitle">SE Mini-Project 2026 • Topic 74</p>
+                    <p class="subtitle">SE Mini-Project 2026 • Topic 74 • Railway Reservation System</p>
                 </div>
             </div>
             <nav class="nav-links">
-                <button class="nav-btn active" onclick="switchTab('search-tab')">Train Search</button>
-                <button class="nav-btn" onclick="switchTab('seat-tab')">Seat Selector</button>
-                <button class="nav-btn" onclick="switchTab('booking-tab')">Book Ticket</button>
-                <button class="nav-btn" onclick="switchTab('pnr-tab')">PNR Status</button>
+                <button class="nav-btn active" data-tab="search-tab" onclick="switchTab('search-tab')">🔍 Train Search</button>
+                <button class="nav-btn" data-tab="seat-tab" onclick="switchTab('seat-tab')">💺 Seat Selector</button>
+                <button class="nav-btn" data-tab="booking-tab" onclick="switchTab('booking-tab')">🎫 Book Ticket</button>
+                <button class="nav-btn" data-tab="pnr-tab" onclick="switchTab('pnr-tab')">🔎 PNR Status</button>
             </nav>
         </div>
     </header>
 
     <main class="container">
-        <!-- 1. SEARCH TAB (Sabbir) -->
+        <!-- 1. TRAIN SEARCH TAB (Sabbir) -->
         <section id="search-tab" class="tab-content active">
             <div class="card">
-                <h2>🔍 Search Trains Between Stations</h2>
+                <div class="card-header">
+                    <h2>🔍 Search Trains Between Stations</h2>
+                    <span class="train-badge">Sabbir's Module</span>
+                </div>
+                <p class="card-desc">Find train routes, check intermediate halts, review live schedule, and view real-time class availability.</p>
+
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Origin Station</label>
-                        <select id="srcStation">
-                            <option value="SBC">KSR Bengaluru City (SBC)</option>
-                            <option value="MAS">Chennai Central (MAS)</option>
-                            <option value="NDLS">New Delhi (NDLS)</option>
-                            <option value="HWH">Howrah Junction (HWH)</option>
-                        </select>
+                        <select id="srcStation"></select>
                     </div>
+
+                    <button type="button" class="swap-btn" title="Swap Stations" onclick="swapStations()">⇄</button>
+
                     <div class="input-group">
                         <label>Destination Station</label>
-                        <select id="dstStation">
-                            <option value="MAS">Chennai Central (MAS)</option>
-                            <option value="SBC">KSR Bengaluru City (SBC)</option>
-                            <option value="NDLS">New Delhi (NDLS)</option>
-                            <option value="HWH">Howrah Junction (HWH)</option>
-                        </select>
+                        <select id="dstStation"></select>
                     </div>
+
                     <div class="input-group">
                         <label>Travel Date</label>
-                        <input type="date" id="travelDate" value="2026-11-20">
+                        <input type="date" id="travelDate">
                     </div>
-                    <div class="input-group action-align">
-                        <button class="btn btn-primary" onclick="searchTrains()">Find Trains</button>
+
+                    <div class="input-group">
+                        <label>Train Category</label>
+                        <select id="trainCategory">
+                            <option value="ALL">All Categories</option>
+                            <option value="Rajdhani">Rajdhani Express</option>
+                            <option value="Shatabdi">Shatabdi Express</option>
+                            <option value="Superfast">Superfast Express</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <button class="btn btn-primary" style="height: 42px;" onclick="searchTrains()">Find Trains</button>
                     </div>
                 </div>
             </div>
 
+            <!-- SEARCH RESULTS -->
             <div id="trainResults" class="results-list"></div>
         </section>
 
         <!-- 2. SEAT SELECTOR TAB (Samvit) -->
         <section id="seat-tab" class="tab-content">
             <div class="card">
-                <h2>💺 Interactive Coach Berth Layout</h2>
+                <div class="card-header">
+                    <h2>💺 Interactive 2D Coach Berth Selector</h2>
+                    <span class="train-badge">Samvit's Module</span>
+                </div>
+                <p class="card-desc">Select your coach class, view berth types (Lower, Middle, Upper, Side), and atomically lock a seat for 5 minutes during checkout.</p>
+
                 <div class="form-grid">
                     <div class="input-group">
                         <label>Select Train</label>
-                        <select id="seatTrainNum">
-                            <option value="12658">12658 - Bengaluru Chennai Mail</option>
-                            <option value="22691">22691 - Bengaluru Rajdhani</option>
-                            <option value="12028">12028 - Shatabdi Express</option>
-                        </select>
+                        <select id="seatTrainNum" onchange="onSeatTrainChange()"></select>
                     </div>
+
                     <div class="input-group">
                         <label>Coach Class</label>
-                        <select id="seatClass">
-                            <option value="SL">Sleeper (SL)</option>
-                            <option value="3A">AC 3-Tier (3A)</option>
-                            <option value="2A">AC 2-Tier (2A)</option>
-                            <option value="1A">AC First Class (1A)</option>
-                        </select>
+                        <select id="seatClass" onchange="loadCoachLayout()"></select>
                     </div>
-                    <div class="input-group action-align">
-                        <button class="btn btn-secondary" onclick="loadCoachLayout()">Load Coach Layout</button>
+
+                    <div class="input-group">
+                        <label>Journey Date</label>
+                        <input type="date" id="seatDate" onchange="loadCoachLayout()">
                     </div>
+
+                    <div class="input-group">
+                        <button class="btn btn-secondary" style="height: 42px;" onclick="loadCoachLayout()">Refresh Layout</button>
+                    </div>
+                </div>
+
+                <div class="coach-header-info">
+                    <div>
+                        <strong id="coachInfoText">Coach Class: 3A</strong>
+                        <span id="availSummaryText" style="margin-left: 1rem; color: var(--success); font-weight:600;"></span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <div id="lockTimerBadge" class="lock-timer-pill">
+                            ⏱️ Seat <span id="lockedSeatNum"></span> Locked: <span id="lockCountdown">05:00</span>
+                        </div>
+                        <button id="releaseLockBtn" class="btn btn-outline btn-sm" style="display:none; color:var(--danger); border-color:#feb2b2;" onclick="releaseCurrentLock()">✕ Release</button>
+                    </div>
+                </div>
+
+                <div class="coach-chassis">
+                    <div id="coachContainer" class="coach-grid"></div>
                 </div>
 
                 <div class="legend">
-                    <span class="legend-item"><span class="badge available"></span> Available</span>
-                    <span class="legend-item"><span class="badge locked"></span> Locked (In Checkout)</span>
-                    <span class="legend-item"><span class="badge booked"></span> Booked</span>
+                    <span class="legend-item"><span class="badge-dot available"></span> Available (Click to select & lock)</span>
+                    <span class="legend-item"><span class="badge-dot locked"></span> Locked (In checkout timer)</span>
+                    <span class="legend-item"><span class="badge-dot booked"></span> Booked / Occupied</span>
                 </div>
 
-                <div id="coachContainer" class="coach-grid"></div>
+                <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button id="bookSelectedSeatBtn" class="btn btn-success" style="display:none;" onclick="proceedWithSelectedSeat()">
+                        Proceed to Book Seat #<span id="selectedSeatLabel"></span> ➔
+                    </button>
+                </div>
             </div>
         </section>
 
         <!-- 3. BOOKING TAB (Vinayak & Rahul) -->
         <section id="booking-tab" class="tab-content">
             <div class="card">
-                <h2>🎫 Book Railway Ticket</h2>
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label>Passenger Name</label>
-                        <input type="text" id="pName" placeholder="Enter Full Name" value="Ravi Kumar">
+                <div class="card-header">
+                    <h2>🎫 Passenger Details & Live Fare Calculation</h2>
+                    <span class="train-badge">Vinayak & Rahul</span>
+                </div>
+                <p class="card-desc">Add passengers, apply statutory concessions (Senior Citizen, Student, Divyangjan), and review itemized fare computation.</p>
+
+                <!-- SELECTED ROUTE SUMMARY BANNER -->
+                <div id="selectedJourneyBanner" style="background: #ebf8ff; border: 1px solid #bee3f8; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <strong id="bjTrainName">12658 - Bengaluru - Chennai Mail</strong>
+                        <div style="font-size: 0.85rem; color: #4a5568; margin-top: 0.25rem;">
+                            Route: <span id="bjRoute">SBC ➔ MAS</span> | Date: <span id="bjDate">2026-11-20</span> | Distance: <span id="bjDist">362</span> km
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>Age</label>
-                        <input type="number" id="pAge" value="28">
-                    </div>
-                    <div class="input-group">
-                        <label>Berth Preference</label>
-                        <select id="pPref">
-                            <option value="Lower">Lower Berth</option>
-                            <option value="Middle">Middle Berth</option>
-                            <option value="Upper">Upper Berth</option>
-                            <option value="Side Lower">Side Lower</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Concession Category</label>
-                        <select id="pConcession" onchange="updateFarePreview()">
-                            <option value="NONE">General (No Concession)</option>
-                            <option value="SENIOR_CITIZEN_MALE">Senior Citizen Male (40% off)</option>
-                            <option value="SENIOR_CITIZEN_FEMALE">Senior Citizen Female (50% off)</option>
-                            <option value="STUDENT">Student Pass (50% off)</option>
-                            <option value="DIVYANGJAN">Divyangjan / PwD (75% off)</option>
-                        </select>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="input-group" style="min-width: 120px;">
+                            <label>Class</label>
+                            <select id="bCoachClass" onchange="updateFarePreview()"></select>
+                        </div>
+                        <div class="input-group" style="min-width: 140px;">
+                            <label>Quota</label>
+                            <select id="bQuota" onchange="updateFarePreview()">
+                                <option value="GENERAL">General Quota</option>
+                                <option value="TATKAL">Tatkal Quota</option>
+                                <option value="LADIES">Ladies Quota</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <div class="fare-preview-box" id="fareBox">
-                    <h3>Estimated Fare Breakdown</h3>
-                    <div class="fare-row"><span>Base Fare:</span> <strong id="fbBase">₹162.00</strong></div>
-                    <div class="fare-row"><span>Discount:</span> <strong id="fbDisc">-₹0.00</strong></div>
-                    <div class="fare-row"><span>Superfast + GST:</span> <strong id="fbTax">₹30.00</strong></div>
-                    <hr>
-                    <div class="fare-row total"><span>Total Payable:</span> <strong id="fbTotal">₹192.00</strong></div>
+                <!-- MULTI-PASSENGER TABLE -->
+                <div class="card-header" style="border:none; padding:0; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 1.05rem; color: #2d3748;">Passenger Information (Max 6)</h3>
+                    <button class="btn btn-outline btn-sm" onclick="addPassengerRow()">+ Add Passenger</button>
                 </div>
 
-                <button class="btn btn-success" style="margin-top: 1.5rem;" onclick="executeBooking()">Pay & Confirm Booking</button>
+                <div class="passenger-table-container">
+                    <table class="passenger-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 25%;">Full Name</th>
+                                <th style="width: 10%;">Age</th>
+                                <th style="width: 12%;">Gender</th>
+                                <th style="width: 18%;">Berth Preference</th>
+                                <th style="width: 25%;">Concession Category</th>
+                                <th style="width: 5%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="passengerRows">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- FARE PREVIEW SUMMARY -->
+                <div class="fare-preview-box">
+                    <h3>💰 Itemized Fare Breakdown (CRIS Fare Engine)</h3>
+                    <div class="fare-row"><span>Base Distance Fare:</span> <strong id="fbBase">₹0.00</strong></div>
+                    <div class="fare-row"><span>Concession Discount:</span> <strong id="fbDisc" style="color:var(--success);">-₹0.00</strong></div>
+                    <div class="fare-row"><span>Tatkal Quota Premium:</span> <strong id="fbTatkal">₹0.00</strong></div>
+                    <div class="fare-row"><span>Superfast Surcharge:</span> <strong id="fbSf">₹0.00</strong></div>
+                    <div class="fare-row"><span>GST (5% for AC Classes):</span> <strong id="fbGst">₹0.00</strong></div>
+                    <div class="fare-row total"><span>Total Payable Amount:</span> <strong id="fbTotal">₹0.00</strong></div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                    <button class="btn btn-success" style="padding: 0.85rem 2rem; font-size: 1rem;" onclick="openPaymentModal()">
+                        💳 Proceed to Payment & Confirmation
+                    </button>
+                </div>
             </div>
         </section>
 
         <!-- 4. PNR STATUS TAB (Rahul) -->
         <section id="pnr-tab" class="tab-content">
             <div class="card">
-                <h2>🔎 PNR Status & Ticket Cancellation</h2>
-                <div class="form-grid">
+                <div class="card-header">
+                    <h2>🔎 Real-Time PNR Tracker & Ticket Cancellation</h2>
+                    <span class="train-badge">Rahul's Module</span>
+                </div>
+                <p class="card-desc">Enter your 10-digit PNR to track status (CNF, RAC, WL), view assigned coach/berth, or cancel with instant refund processing.</p>
+
+                <div class="form-grid" style="max-width: 600px;">
                     <div class="input-group">
-                        <label>Enter 10-Digit PNR</label>
-                        <input type="text" id="pnrInput" placeholder="e.g. 4239845721" maxlength="10">
+                        <label>10-Digit PNR Number</label>
+                        <input type="text" id="pnrInput" placeholder="Enter PNR e.g. 4239845721" maxlength="10">
                     </div>
-                    <div class="input-group action-align">
-                        <button class="btn btn-primary" onclick="checkPnrStatus()">Check Status</button>
+                    <div class="input-group">
+                        <button class="btn btn-primary" style="height: 42px;" onclick="checkPnrStatus()">Check PNR</button>
                     </div>
+                </div>
+
+                <!-- RECENT BOOKINGS QUICK PILLS -->
+                <div id="recentPnrsContainer" style="margin-top: 1rem; display: none;">
+                    <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Recent PNRs in session: </span>
+                    <span id="recentPnrsList"></span>
                 </div>
             </div>
 
-            <div id="pnrResultCard" class="card" style="display:none; margin-top: 1.5rem;"></div>
+            <!-- E-TICKET RECEIPT DISPLAY -->
+            <div id="pnrResultCard" style="display:none;"></div>
         </section>
     </main>
+
+    <!-- MODAL 1: TRAIN SCHEDULE & LIVE GPS STATUS -->
+    <div id="scheduleModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h2 id="schedModalTrainName" style="font-size: 1.2rem; color: var(--primary);">Train Schedule</h2>
+                    <span id="schedModalLiveStatus" style="font-size: 0.82rem; color: var(--success); font-weight: 600;"></span>
+                </div>
+                <button class="modal-close" onclick="closeScheduleModal()">&times;</button>
+            </div>
+            <div id="schedModalBody"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PAYMENT GATEWAY SIMULATION -->
+    <div id="paymentModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 480px;">
+            <div class="modal-header">
+                <h2>Simulated Payment Gateway</h2>
+                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">Select your preferred payment method to complete ticket issuance:</p>
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="payMethod" value="UPI" checked>
+                    <div>
+                        <strong>UPI (Google Pay / PhonePe / Paytm)</strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Instant verification, zero transaction surcharge</div>
+                    </div>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="payMethod" value="CARD">
+                    <div>
+                        <strong>Credit / Debit Card</strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Visa, MasterCard, RuPay</div>
+                    </div>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">
+                    <input type="radio" name="payMethod" value="NET_BANKING">
+                    <div>
+                        <strong>Net Banking</strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">SBI, HDFC, ICICI, Axis Bank</div>
+                    </div>
+                </label>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Total Amount</span>
+                    <div id="payModalAmount" style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">₹0.00</div>
+                </div>
+                <button class="btn btn-success" style="padding: 0.75rem 1.75rem;" onclick="executeBooking()">
+                    Authorize & Book Ticket
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: CANCELLATION REFUND PREVIEW -->
+    <div id="cancelModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 style="color: var(--danger);">Confirm Ticket Cancellation</h2>
+                <button class="modal-close" onclick="closeCancelModal()">&times;</button>
+            </div>
+            <p style="font-size: 0.9rem; margin-bottom: 0.75rem;">Are you sure you want to cancel PNR <strong id="cancelPnrLabel"></strong>?</p>
+
+            <div class="input-group" style="margin-bottom: 1rem;">
+                <label style="font-size:0.85rem; font-weight:600;">Time of Cancellation (Relative to Departure)</label>
+                <select id="cancelTimeframe" onchange="onCancelTimeframeChange()" style="width:100%; padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
+                    <option value="50">More than 48 hours prior (Flat Clerkage Fee)</option>
+                    <option value="24">Between 48 and 12 hours prior (25% deduction)</option>
+                    <option value="6">Between 12 and 4 hours prior (50% deduction)</option>
+                    <option value="2">Less than 4 hours prior (0% refund / 100% deduction)</option>
+                </select>
+            </div>
+
+            <div style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                <div class="fare-row"><span>Total Paid:</span> <strong id="cancelTotalPaid">₹0.00</strong></div>
+                <div class="fare-row"><span>Cancellation Clerkage Fee:</span> <strong id="cancelFee" style="color: var(--danger);">-₹0.00</strong></div>
+                <hr style="margin: 0.5rem 0; border: none; border-top: 1px dashed #feb2b2;">
+                <div class="fare-row total" style="color: var(--success); font-size: 1.15rem;"><span>Estimated Refund:</span> <strong id="cancelRefundAmount">₹0.00</strong></div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                <button class="btn btn-outline" onclick="closeCancelModal()">Keep Ticket</button>
+                <button class="btn btn-danger" onclick="confirmCancelTicket()">Confirm Cancellation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: STATION FACILITIES & AMENITIES (SABBIR) -->
+    <div id="facilityModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 520px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="facModalStationName" style="color: var(--primary); font-size: 1.2rem;">Station Amenities</h2>
+                    <span id="facModalZone" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+                </div>
+                <button class="modal-close" onclick="closeFacilityModal()">&times;</button>
+            </div>
+            <div id="facModalBody"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: LIVE SATELLITE GPS RADAR (SABBIR) -->
+    <div id="gpsModal" class="modal-overlay">
+        <div class="modal-card" style="max-width: 540px;">
+            <div class="modal-header">
+                <div>
+                    <h2 id="gpsModalTrainTitle" style="color: var(--primary); font-size: 1.2rem;">🛰️ NTES Satellite Telemetry</h2>
+                    <span style="font-size: 0.8rem; color: var(--success); font-weight:600;">● Live GPS Radar Active</span>
+                </div>
+                <button class="modal-close" onclick="closeGpsModal()">&times;</button>
+            </div>
+            <div id="gpsModalBody"></div>
+        </div>
+    </div>
+
+    <!-- FLOATING TOASTS CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <script src="app.js"></script>
 </body>
