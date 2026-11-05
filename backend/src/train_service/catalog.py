@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Any
 from datetime import datetime, date
-from backend.src.database.seed_data import TRAINS, STATIONS
+from backend.src.database.seed_data import TRAINS, STATIONS, STATION_FACILITIES
 
 class RailwayAPIService:
     """
@@ -18,14 +18,45 @@ class RailwayAPIService:
         if not train:
             return {"status": "ERROR", "message": f"Train {train_number} not found."}
         
+        current_station = train["halts"][1]["station_code"] if len(train["halts"]) > 1 else train["source"]
         return {
             "status": "SUCCESS",
             "train_number": train["train_number"],
             "train_name": train["train_name"],
-            "current_station": train["halts"][1]["station_code"] if len(train["halts"]) > 1 else train["source"],
+            "current_station": current_station,
             "delay_minutes": 5,
             "status_message": "Running on time (5 mins delay)",
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+    def fetch_live_gps_tracking(self, train_number: str) -> Dict[str, Any]:
+        """
+        Simulates GPS satellite telemetry with speed, coordinates, and approaching halt.
+        """
+        train = next((t for t in TRAINS if t["train_number"] == train_number), None)
+        if not train:
+            return {"status": "ERROR", "message": f"Train {train_number} not found"}
+
+        halts = train["halts"]
+        current_halt = halts[1] if len(halts) > 1 else halts[0]
+        next_halt = halts[2] if len(halts) > 2 else halts[-1]
+
+        return {
+            "status": "SUCCESS",
+            "train_number": train["train_number"],
+            "train_name": train["train_name"],
+            "speed_kmh": 85.4,
+            "telemetry": {
+                "latitude": 12.9716,
+                "longitude": 77.5946,
+                "heading": "NE"
+            },
+            "current_halt": current_halt["station_code"],
+            "next_halt": next_halt["station_code"],
+            "eta_next_halt": next_halt["dep"],
+            "distance_remaining_km": next_halt["distance_km"] - current_halt["distance_km"],
+            "delay_minutes": 3,
+            "signal_status": "GREEN"
         }
 
 class TrainCatalogService:
@@ -36,26 +67,69 @@ class TrainCatalogService:
     def __init__(self, api_service: Optional[RailwayAPIService] = None):
         self.api_service = api_service or RailwayAPIService()
         self.stations = STATIONS
+        self.facilities = STATION_FACILITIES
         self.trains = TRAINS
 
     def get_all_stations(self) -> List[Dict[str, str]]:
         return list(self.stations.values())
 
     def get_station_by_code(self, code: str) -> Optional[Dict[str, str]]:
-        return self.stations.get(code.upper())
+        if not code:
+            return None
+        return self.stations.get(code.strip().upper())
+
+    def get_station_facilities(self, code: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve station infrastructure and passenger amenities.
+        """
+        if not code:
+            return None
+        clean_code = code.strip().upper()
+        station = self.stations.get(clean_code)
+        facilities = self.facilities.get(clean_code)
+        if not station or not facilities:
+            return None
+        return {
+            "station_code": clean_code,
+            "station_name": station["name"],
+            "zone": station["zone"],
+            "facilities": facilities
+        }
+
+    def get_all_trains(self) -> List[Dict]:
+        return [
+            {
+                "train_number": t["train_number"],
+                "train_name": t["train_name"],
+                "train_type": t["train_type"],
+                "source": t["source"],
+                "destination": t["destination"],
+                "departure_time": t["departure_time"],
+                "arrival_time": t["arrival_time"],
+                "distance_km": t["distance_km"],
+                "available_classes": t["available_classes"],
+                "days_of_run": t["days_of_run"]
+            }
+            for t in self.trains
+        ]
 
     def search_trains(self, source: str, destination: str, travel_date: Optional[str] = None) -> List[Dict]:
         """
         Search trains between two stations (direct or via route halts).
         """
-        src = source.upper()
-        dst = destination.upper()
+        if not source or not destination:
+            return []
+            
+        src = source.strip().upper()
+        dst = destination.strip().upper()
+        if src == dst:
+            return []
+            
         results = []
-
         day_of_week = None
         if travel_date:
             try:
-                dt = datetime.strptime(travel_date, "%Y-%m-%d")
+                dt = datetime.strptime(travel_date.strip(), "%Y-%m-%d")
                 day_of_week = dt.strftime("%a").upper()
             except ValueError:
                 pass
@@ -82,7 +156,8 @@ class TrainCatalogService:
                         "arrival_time": train["halts"][dst_idx]["dep"],
                         "segment_distance_km": segment_distance,
                         "available_classes": train["available_classes"],
-                        "days_of_run": train["days_of_run"]
+                        "days_of_run": train["days_of_run"],
+                        "halts": train["halts"]
                     })
         return results
 
@@ -90,12 +165,23 @@ class TrainCatalogService:
         """
         Retrieve complete schedule and station halt timetable.
         """
-        train = next((t for t in self.trains if t["train_number"] == train_number), None)
+        if not train_number:
+            return None
+        t_num = train_number.strip()
+        train = next((t for t in self.trains if t["train_number"] == t_num), None)
         if not train:
             return None
         
-        live = self.api_service.fetch_live_status(train_number)
+        live = self.api_service.fetch_live_status(t_num)
         return {
             "train_info": train,
             "live_status": live
         }
+
+    def get_live_gps_tracking(self, train_number: str) -> Optional[Dict]:
+        """
+        Retrieve live satellite GPS tracking telemetry for train.
+        """
+        if not train_number:
+            return None
+        return self.api_service.fetch_live_gps_tracking(train_number.strip())
