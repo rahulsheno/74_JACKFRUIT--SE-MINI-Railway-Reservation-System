@@ -1,6 +1,10 @@
 import time
 import math
 from typing import Dict, Optional, Tuple
+from backend.src.fare_calculator.models import FareBreakdownModel, RefundEstimateModel
+
+# Indian Railway Peak Festival & Holiday Surcharges
+FESTIVAL_DATES = {"2026-11-10", "2026-12-25", "2026-01-01", "2026-01-14", "2026-10-20"}
 
 class FareCalculatorService:
     """
