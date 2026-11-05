@@ -93,3 +93,41 @@ def test_exhaustion_to_rac_and_wl(engine):
     wl_res = engine.allocate_best_seat("22691", "2026-11-20", "1A")
     assert wl_res["status"] == "WL"
     assert wl_res["queue_position"] == 1
+
+
+# TC_SAMVIT_11: Contiguous bay/cabin allocation for family bookings
+def test_contiguous_group_allocation(engine):
+    group = engine.allocate_group_seats('12658', '2026-12-01', '3A', passenger_count=3)
+    assert len(group) == 3
+    assert all(g['status'] == 'CNF' for g in group)
+    seat_nums = [g['seat']['seat_number'] for g in group]
+    assert seat_nums == [1, 2, 3]
+
+# TC_SAMVIT_12: Explicit user seat unlock
+def test_explicit_user_seat_unlock(engine):
+    ok, lock_id = engine.lock_seat('12658', '2026-12-01', '2A', 5, 'session_user_42')
+    assert ok is True
+    unlocked = engine.release_user_seat_lock('12658', '2026-12-01', '2A', 5, 'session_user_42')
+    assert unlocked is True
+    layout = engine.get_coach_layout('12658', '2026-12-01', '2A')
+    assert layout[4]['status'] == 'AVAILABLE'
+
+# TC_SAMVIT_13: Extend valid lock via heartbeat renewal
+def test_renew_seat_lock_valid(engine):
+    ok, lock_id = engine.lock_seat('12658', '2026-12-01', 'SL', 6, 'session_user_42')
+    assert ok is True
+    renewed, msg = engine.renew_seat_lock(lock_id, 'session_user_42')
+    assert renewed is True
+    assert 'renewed' in msg.lower()
+
+# TC_SAMVIT_14: Renew lock for non-existent or unauthorized lock
+def test_renew_seat_lock_expired_or_invalid(engine):
+    renewed, msg = engine.renew_seat_lock('invalid_lock_999', 'user_xyz')
+    assert renewed is False
+
+# TC_SAMVIT_15: Availability summary report
+def test_coach_layout_accessibility_and_summary(engine):
+    summary = engine.get_seat_availability_summary('12658', '2026-12-01', '3A')
+    assert 'total_seats' in summary
+    assert 'available' in summary
+    assert summary['total_seats'] == 16
