@@ -131,3 +131,19 @@ def test_coach_layout_accessibility_and_summary(engine):
     assert 'total_seats' in summary
     assert 'available' in summary
     assert summary['total_seats'] == 16
+
+
+# TC_SAMVIT_16: Coach occupancy breakdown calculation
+def test_coach_occupancy_breakdown_valid(engine):
+    res = engine.get_coach_occupancy_breakdown('12658', '2026-12-01')
+    assert res['status'] == 'SUCCESS'
+    assert 'class_breakdown' in res
+    assert len(res['class_breakdown']) > 0
+    assert 'overall_occupancy_pct' in res
+
+# TC_SAMVIT_17: Coach occupancy breakdown for non-existent train
+def test_coach_occupancy_breakdown_invalid(engine):
+    res = engine.get_coach_occupancy_breakdown('999999', '2026-12-01')
+    assert res['status'] == 'ERROR'
+    res_empty = engine.get_coach_occupancy_breakdown('', '2026-12-01')
+    assert res_empty['status'] == 'ERROR'

@@ -1,6 +1,7 @@
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from backend.src.seat_engine.models import SeatModel, LockModel
+from backend.src.database.seed_data import TRAINS
 
 class CoachLayout:
     """
@@ -282,4 +283,48 @@ class SeatAllocationEngine:
             "wl_count": wl_count,
             "status_text": status_text,
             "status_code": status_code
+        }
+
+    def get_coach_occupancy_breakdown(self, train_number: str, journey_date: str = "2026-11-09") -> Dict[str, Any]:
+        """
+        Calculates occupancy metrics and capacity utilization across all coach classes.
+        """
+        if not train_number:
+            return {"status": "ERROR", "message": "Train number required"}
+            
+        train = next((t for t in TRAINS if t["train_number"] == train_number.strip()), None)
+        if not train:
+            return {"status": "ERROR", "message": f"Train {train_number} not found"}
+
+        classes = train.get("available_classes", ["SL", "3A", "2A"])
+        breakdown = []
+        tot_seats = 0
+        tot_booked = 0
+
+        for c in classes:
+            summary = self.get_seat_availability_summary(train_number, journey_date, c)
+            occ_pct = round((summary["booked"] / summary["total_seats"]) * 100, 1) if summary["total_seats"] > 0 else 0.0
+            breakdown.append({
+                "coach_class": c,
+                "total_seats": summary["total_seats"],
+                "available": summary["available"],
+                "locked": summary["locked"],
+                "booked": summary["booked"],
+                "rac_count": summary["rac_count"],
+                "wl_count": summary["wl_count"],
+                "occupancy_rate_pct": occ_pct
+            })
+            tot_seats += summary["total_seats"]
+            tot_booked += summary["booked"]
+
+        overall_occ = round((tot_booked / tot_seats) * 100, 1) if tot_seats > 0 else 0.0
+        return {
+            "status": "SUCCESS",
+            "train_number": train_number,
+            "train_name": train["train_name"],
+            "journey_date": journey_date,
+            "overall_capacity": tot_seats,
+            "overall_booked": tot_booked,
+            "overall_occupancy_pct": overall_occ,
+            "class_breakdown": breakdown
         }

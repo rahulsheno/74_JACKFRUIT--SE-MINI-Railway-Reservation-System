@@ -16,3 +16,4 @@ class LockModel:
     user_id: str
     locked_at: float
     expires_at: float
+
