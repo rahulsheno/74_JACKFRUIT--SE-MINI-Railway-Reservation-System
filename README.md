@@ -29,10 +29,11 @@ railway-reservation-system/
 │   │   ├── booking_lifecycle/          # [Rahul] PNR generation, cancellation, JWT auth
 │   │   └── database/                   # Seed data & in-memory/JSON store
 │   └── tests/
-│       ├── test_train_service.py       # [Sabbir] 8-10 Unit tests
-│       ├── test_seat_engine.py         # [Samvit] 8-10 Unit tests
-│       ├── test_fare_calculator.py     # [Vinayak] 8-10 Unit tests
-│       └── test_booking_lifecycle.py   # [Rahul] 8-10 Unit tests
+│       ├── test_train_service.py       # [Sabbir] 15 Unit tests (Routes, Stations & GPS Radar)
+│       ├── test_seat_engine.py         # [Samvit] 15 Unit tests (Coach 2D maps, Locking & Groups)
+│       ├── test_fare_calculator.py     # [Vinayak] 16 Unit tests (Tariff, Concessions & Refunds)
+│       ├── test_booking_lifecycle.py   # [Rahul] 10 Unit tests (PNR tracker & Cascade Promotion)
+│       └── test_api_endpoints.py       # [Full-Stack] 19 REST API Integration Tests
 ├── frontend/                           # Responsive Interactive UI
 │   ├── index.html
 │   ├── app.js
