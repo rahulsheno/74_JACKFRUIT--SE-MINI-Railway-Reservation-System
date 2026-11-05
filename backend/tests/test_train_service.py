@@ -74,3 +74,37 @@ def test_railway_api_service_non_existent():
     api = RailwayAPIService()
     res = api.fetch_live_status("00000")
     assert res["status"] == "ERROR"
+
+
+# TC_SABBIR_11: Verify bidirectional return train routes (MAS -> SBC)
+def test_search_return_paired_trains(catalog):
+    results = catalog.search_trains('MAS', 'SBC')
+    train_nums = [r['train_number'] for r in results]
+    assert '12657' in train_nums
+    assert '12027' in train_nums
+
+# TC_SABBIR_12: Verify station amenities and infrastructure lookup
+def test_get_station_facilities_valid(catalog):
+    fac = catalog.get_station_facilities('SBC')
+    assert fac is not None
+    assert fac['station_code'] == 'SBC'
+    assert fac['facilities']['wifi'] is True
+    assert fac['facilities']['wheelchair_accessible'] is True
+
+# TC_SABBIR_13: Station facilities with invalid code
+def test_get_station_facilities_invalid(catalog):
+    fac = catalog.get_station_facilities('UNKNOWN99')
+    assert fac is None
+
+# TC_SABBIR_14: Live satellite GPS tracking telemetry
+def test_live_gps_telemetry_valid(catalog):
+    gps = catalog.get_live_gps_tracking('12658')
+    assert gps['status'] == 'SUCCESS'
+    assert gps['speed_kmh'] > 0
+    assert 'latitude' in gps['telemetry']
+    assert gps['signal_status'] == 'GREEN'
+
+# TC_SABBIR_15: GPS tracking for invalid train
+def test_live_gps_telemetry_invalid(catalog):
+    gps = catalog.get_live_gps_tracking('00000')
+    assert gps['status'] == 'ERROR'
