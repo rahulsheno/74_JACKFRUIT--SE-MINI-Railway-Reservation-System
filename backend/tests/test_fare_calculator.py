@@ -107,3 +107,10 @@ def test_cancellation_refund_waitlist_clerkage(calc):
 
     pay = calc.simulate_payment(440.0, 'UPI')
     assert 'upi://pay' in pay['upi_qr_payload']
+
+
+# TC_VINAYAK_16: Peak festival & holiday calendar verification
+def test_festival_dates_definition():
+    from backend.src.fare_calculator.calculator import FESTIVAL_DATES
+    assert '2026-12-25' in FESTIVAL_DATES
+    assert '2026-01-01' in FESTIVAL_DATES
