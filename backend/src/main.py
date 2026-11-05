@@ -37,6 +37,7 @@ class PassengerSchema(BaseModel):
     age: int
     gender: Optional[str] = "M"
     berth_preference: Optional[str] = None
+    seat_number: Optional[int] = None
     concession_type: Optional[str] = "NONE"
 
 class BookingRequest(BaseModel):
@@ -56,6 +57,17 @@ class SeatLockRequest(BaseModel):
     seat_number: int
     user_id: str
 
+class SeatUnlockRequest(BaseModel):
+    train_number: str
+    journey_date: str
+    coach_class: str
+    seat_number: int
+    user_id: Optional[str] = None
+
+class SeatRenewRequest(BaseModel):
+    lock_id: str
+    user_id: Optional[str] = None
+
 class CancellationRequest(BaseModel):
     pnr: str
     hours_before_departure: Optional[float] = 50.0
@@ -64,6 +76,10 @@ class CancellationRequest(BaseModel):
 @app.get("/api/stations", tags=["Train Catalog - Sabbir"])
 def get_stations():
     return catalog_service.get_all_stations()
+
+@app.get("/api/trains", tags=["Train Catalog - Sabbir"])
+def get_all_trains():
+    return catalog_service.get_all_trains()
 
 @app.get("/api/trains/search", tags=["Train Catalog - Sabbir"])
 def search_trains(source: str, destination: str, travel_date: Optional[str] = None):
@@ -77,11 +93,29 @@ def get_train_schedule(train_number: str):
         raise HTTPException(status_code=404, detail="Train schedule not found")
     return schedule
 
+@app.get("/api/stations/{station_code}/facilities", tags=["Train Catalog - Sabbir"])
+def get_station_facilities(station_code: str):
+    fac = catalog_service.get_station_facilities(station_code)
+    if not fac:
+        raise HTTPException(status_code=404, detail="Station facilities not found")
+    return fac
+
+@app.get("/api/trains/{train_number}/live-tracking", tags=["Train Catalog - Sabbir"])
+def get_live_gps_tracking(train_number: str):
+    tracking = catalog_service.get_live_gps_tracking(train_number)
+    if not tracking or tracking.get("status") == "ERROR":
+        raise HTTPException(status_code=404, detail="Train GPS tracking telemetry unavailable")
+    return tracking
+
 # ----------------- 2. SEAT LAYOUT & LOCKING (SAMVIT) -----------------
 @app.get("/api/seats/layout", tags=["Seat Allocation Engine - Samvit"])
 def get_coach_layout(train_number: str, journey_date: str, coach_class: str):
     layout = seat_engine.get_coach_layout(train_number, journey_date, coach_class)
     return {"train_number": train_number, "coach_class": coach_class, "seats": layout}
+
+@app.get("/api/seats/availability", tags=["Seat Allocation Engine - Samvit"])
+def get_seat_availability(train_number: str, journey_date: str, coach_class: str):
+    return seat_engine.get_seat_availability_summary(train_number, journey_date, coach_class)
 
 @app.post("/api/seats/lock", tags=["Seat Allocation Engine - Samvit"])
 def lock_seat(req: SeatLockRequest):
@@ -95,12 +129,55 @@ def release_seat_lock(lock_id: str):
     ok = seat_engine.release_lock(lock_id)
     return {"status": "SUCCESS" if ok else "NOT_FOUND"}
 
+@app.post("/api/seats/unlock", tags=["Seat Allocation Engine - Samvit"])
+def release_user_seat(req: SeatUnlockRequest):
+    ok = seat_engine.release_user_seat_lock(req.train_number, req.journey_date, req.coach_class, req.seat_number, req.user_id or "")
+    if not ok:
+        raise HTTPException(status_code=400, detail="Seat was not locked or already released")
+    return {"status": "SUCCESS", "message": f"Seat {req.seat_number} unlocked"}
+
+@app.post("/api/seats/lock/renew", tags=["Seat Allocation Engine - Samvit"])
+def renew_seat_lock(req: SeatRenewRequest):
+    ok, msg = seat_engine.renew_seat_lock(req.lock_id, req.user_id or "")
+    if not ok:
+        raise HTTPException(status_code=400, detail=msg)
+    return {"status": "SUCCESS", "message": msg}
+
 # ----------------- 3. FARE CALCULATION & CONCESSIONS (VINAYAK) -----------------
 @app.get("/api/fare/calculate", tags=["Fare Engine - Vinayak"])
-def calculate_fare(distance_km: float, coach_class: str, concession_type: str = "NONE", quota: str = "GENERAL"):
+def calculate_fare(
+    distance_km: float,
+    coach_class: str,
+    concession_type: str = "NONE",
+    quota: str = "GENERAL",
+    is_superfast: bool = True
+):
     try:
-        fare = fare_calculator.calculate_fare(distance_km, coach_class, concession_type, quota)
+        fare = fare_calculator.calculate_fare(
+            distance_km=distance_km,
+            coach_class=coach_class,
+            concession_type=concession_type,
+            quota=quota,
+            is_superfast=is_superfast
+        )
         return fare
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/fare/refund-estimate", tags=["Fare Engine - Vinayak"])
+def estimate_cancellation_refund(
+    total_paid: float,
+    hours_before_departure: float = 48.0,
+    coach_class: str = "3A",
+    status: str = "CNF"
+):
+    try:
+        return fare_calculator.calculate_cancellation_refund(
+            total_paid=total_paid,
+            hours_before_departure=hours_before_departure,
+            status=status,
+            coach_class=coach_class
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -146,4 +223,3 @@ def cancel_ticket(req: CancellationRequest):
 frontend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend")
 if os.path.exists(frontend_path):
     app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
-
