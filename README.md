@@ -42,7 +42,10 @@ railway-reservation-system/
 │   ├── 01_SYNOPSIS.md
 │   ├── 02_SRS_DOCUMENT.md
 │   ├── 03_ARCHITECTURE_DESIGN.md
-│   └── 04_TEST_PLAN_SPECIFICATION.md
+│   ├── 04_TEST_PLAN_SPECIFICATION.md
+│   └── 05_SPRINT_1_REVIEW_AND_SIGNOFF.md
+├── scripts/                            # DevOps & Tooling Automation
+│   └── generate_jira_csv.py
 ├── .github/workflows/ci.yml            # CI/CD Automated Test Pipeline
 ├── Dockerfile & docker-compose.yml
 └── requirements.txt
