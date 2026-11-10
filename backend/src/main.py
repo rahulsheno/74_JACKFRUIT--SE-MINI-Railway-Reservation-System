@@ -240,7 +240,12 @@ def cancel_ticket(req: CancellationRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-# Mount Frontend Static Assets
-frontend_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "frontend")
-if os.path.exists(frontend_path):
+# Mount Frontend Static Assets (Prefers compiled React 19 dist, fallbacks to static frontend)
+base_repo_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+dist_path = os.path.join(base_repo_dir, "dist")
+frontend_path = os.path.join(base_repo_dir, "frontend")
+
+if os.path.exists(dist_path):
+    app.mount("/", StaticFiles(directory=dist_path, html=True), name="frontend")
+elif os.path.exists(frontend_path):
     app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")

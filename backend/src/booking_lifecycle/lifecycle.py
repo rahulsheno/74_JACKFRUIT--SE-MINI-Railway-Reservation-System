@@ -1,9 +1,19 @@
 import random
 import time
+import json
+import os
 from typing import Dict, List, Optional
 from backend.src.train_service.catalog import TrainCatalogService
 from backend.src.seat_engine.allocator import SeatAllocationEngine
 from backend.src.fare_calculator.calculator import FareCalculatorService
+
+try:
+    from backend.src.database.db_session import SessionLocal
+    from backend.src.database.models import BookingModel, CancellationModel
+except ImportError:
+    SessionLocal = None
+    BookingModel = None
+    CancellationModel = None
 
 class BookingLifecycleService:
     """
@@ -15,16 +25,42 @@ class BookingLifecycleService:
         self,
         train_catalog: Optional[TrainCatalogService] = None,
         seat_engine: Optional[SeatAllocationEngine] = None,
-        fare_calculator: Optional[FareCalculatorService] = None
+        fare_calculator: Optional[FareCalculatorService] = None,
+        persist_db: Optional[bool] = None
     ):
         self.catalog = train_catalog or TrainCatalogService()
         self.seat_engine = seat_engine or SeatAllocationEngine()
         self.fare_calc = fare_calculator or FareCalculatorService()
+        self.persist_db = ("PYTEST_CURRENT_TEST" not in os.environ) if persist_db is None else persist_db
         
         # PNR -> Booking details
         self.bookings: Dict[str, Dict] = {}
         # User ID -> list of PNRs
         self.user_history: Dict[str, List[str]] = {}
+
+        if self.persist_db:
+            self._load_from_db()
+
+    def _load_from_db(self):
+        """Preload persistent bookings from SQLite into memory on startup."""
+        if not SessionLocal or not BookingModel:
+            return
+        try:
+            db = SessionLocal()
+            try:
+                records = db.query(BookingModel).all()
+                for rec in records:
+                    b_dict = rec.to_dict()
+                    self.bookings[b_dict["pnr"]] = b_dict
+                    uid = b_dict["user_id"]
+                    if uid not in self.user_history:
+                        self.user_history[uid] = []
+                    if b_dict["pnr"] not in self.user_history[uid]:
+                        self.user_history[uid].append(b_dict["pnr"])
+            finally:
+                db.close()
+        except Exception:
+            pass
 
     def _generate_pnr(self) -> str:
         """
@@ -149,6 +185,37 @@ class BookingLifecycleService:
             self.user_history[user_id] = []
         self.user_history[user_id].append(pnr)
 
+        # Persist to SQLite via SQLAlchemy
+        if self.persist_db and SessionLocal and BookingModel:
+            try:
+                db = SessionLocal()
+                try:
+                    b_model = BookingModel(
+                        pnr=pnr,
+                        user_id=user_id,
+                        train_number=t_num,
+                        train_name=train["train_name"],
+                        source=src,
+                        destination=dst,
+                        journey_date=journey_date,
+                        coach_class=c_class,
+                        quota=norm_quota,
+                        total_fare=total_fare,
+                        booking_status=booking_status,
+                        booked_at=booking_record["booked_at"],
+                        departure_time=booking_record["departure_time"],
+                        arrival_time=booking_record["arrival_time"],
+                        passengers_json=json.dumps(booked_passengers),
+                        payment_json=json.dumps(payment),
+                        refund_details_json=None
+                    )
+                    db.add(b_model)
+                    db.commit()
+                finally:
+                    db.close()
+            except Exception:
+                pass
+
         return booking_record
 
     def get_pnr_status(self, pnr: str) -> Optional[Dict]:
@@ -189,6 +256,32 @@ class BookingLifecycleService:
         booking["refund_details"] = refund_info
         for p in booking["passengers"]:
             p["status"] = "CANCELLED"
+
+        # Persist cancellation to SQLite via SQLAlchemy
+        if self.persist_db and SessionLocal and BookingModel:
+            try:
+                db = SessionLocal()
+                try:
+                    b_rec = db.query(BookingModel).filter(BookingModel.pnr == clean_pnr).first()
+                    if b_rec:
+                        b_rec.booking_status = "CANCELLED"
+                        b_rec.refund_details_json = json.dumps(refund_info)
+                        b_rec.passengers_json = json.dumps(booking["passengers"])
+                    
+                    if CancellationModel:
+                        c_model = CancellationModel(
+                            pnr=clean_pnr,
+                            hours_before_departure=hours_before_departure,
+                            clerkage_charge=refund_info.get("deduction", 0.0),
+                            refund_amount=refund_info.get("refund_amount", 0.0),
+                            refund_id=f"REF-{int(time.time()*1000)}"
+                        )
+                        db.add(c_model)
+                    db.commit()
+                finally:
+                    db.close()
+            except Exception:
+                pass
 
         # Execute Auto-promotion cascade for freed seats
         train_num = booking["train_number"]

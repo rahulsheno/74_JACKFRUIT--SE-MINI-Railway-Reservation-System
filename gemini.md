@@ -1,245 +1,190 @@
-# Railway Ticket Reservation System (RRS)
-## Comprehensive Execution & Operational Manual
+# Railway Ticket Reservation System (RRS) & IRCTC Connect
+## Comprehensive Full-Stack Operational Manual
 **Topic 74**: Railway Ticket Reservation System  
 **Course Code**: `UE24CS341A` • Software Engineering Mini-Project 2026  
-**Milestone Release**: `v1.0.0-sprint1` (Sprint 1 Production-Ready MVP)  
-**Sprint 1 Status**: **100% Complete & Signed Off**  
-**Sprint 2 Commencement**: **Wednesday, 07-11-2026**
+**Milestone Release**: `v1.0.0-sprint1` (Sprint 1 MVP) & Modern Full-Stack Portal (IRCTC Connect)
 
 ---
 
 ## 📋 Table of Contents
-1. [Prerequisites & Environment Setup](#1-prerequisites--environment-setup)
+1. [Overview & Tech Stack](#1-overview--tech-stack)
 2. [How to Run the Application](#2-how-to-run-the-application)
-3. [Accessing Web Endpoints](#3-accessing-web-endpoints)
+   - [Method A: Modern React 19 + Express Full-Stack Portal (Recommended)](#method-a-modern-react-19--express-full-stack-portal)
+   - [Method B: FastAPI Python Backend & Core Engine](#method-b-fastapi-python-backend--core-engine)
+3. [Web Endpoints & Access URLs](#3-web-endpoints--access-urls)
 4. [Running the Automated Test Suite (84/84 Tests)](#4-running-the-automated-test-suite-8484-tests)
-5. [End-to-End Feature Tour & Testing Guide](#5-end-to-end-feature-tour--testing-guide)
+5. [Feature Guide & Capabilities](#5-feature-guide--capabilities)
 6. [Team Member Ownership & Contributions](#6-team-member-ownership--contributions)
-7. [Project Structure & Architecture](#7-project-structure--architecture)
-8. [Sprint 1 Sign-Off & Sprint 2 Notice](#8-sprint-1-sign-off--sprint-2-notice)
+7. [Project Directory Architecture](#7-project-directory-architecture)
 
 ---
 
-## 1. Prerequisites & Environment Setup
+## 1. Overview & Tech Stack
 
-### System Requirements
-* **Operating System**: Windows 10/11, macOS, or Linux
-* **Python**: Python 3.10+ (Tested on Python 3.13)
-* **Web Browser**: Any modern browser (Chrome, Firefox, Edge, Safari)
+The repository provides a dual, enterprise-grade architecture:
 
-### Setup Instructions
-1. Open PowerShell or Command Prompt.
-2. Navigate to the project root directory:
-   ```powershell
-   cd "c:\Users\Prabha Prabhu\Downloads\Railway Reservation System"
-   ```
-3. (Optional but recommended) Create and activate a Python virtual environment:
-   ```powershell
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   ```
-4. Install dependencies:
-   ```powershell
-   pip install -r requirements.txt
-   ```
+1. **Modern Frontend (IRCTC Connect)**:
+   * **Framework**: React 19, Vite 6, Tailwind CSS
+   * **UI/UX**: Lucide React icons, responsive mobile-first Indian Railways theme, authentic Vande Bharat & Rajdhani branding
+   * **Features**: Live train search, interactive berth selection, meal preference selector, PDF ticket generator (`jspdf`, `html2canvas`), PNR status modal, live GPS tracking radar (`RailRadar API`).
+
+2. **Express & SHA-256 Hash Backend (`server.js`)**:
+   * **Server**: Node.js & Express (Port `5000`)
+   * **Security**: SHA-256 cryptographic hash-chained ticket verification database (`server/hashDb.js`, `server/sqliteDb.js`, `data/railway.db`)
+   * **Communication**: Real email delivery via Resend API and Gmail SMTP for instant e-ticket reservation slips.
+
+3. **FastAPI Engine & Test Suite (`backend/src/main.py`)**:
+   * **Server**: Python FastAPI & Uvicorn (Port `8000`)
+   * **Quality**: 84 Automated pytest unit and integration tests across 4 student modules.
 
 ---
 
 ## 2. How to Run the Application
 
-The application features a unified FastAPI server that serves both the **REST API backend** and the **responsive single-page frontend** simultaneously.
+### Method A: Modern React 19 + Express Full-Stack Portal
 
-### Start the Server:
+This launches both the **Express backend server** (port 5000) and the **Vite React frontend** (port 5173) simultaneously:
+
+```powershell
+npm run all
+```
+
+*Or launch them in separate terminals if preferred:*
+* **Terminal 1 (Backend Server)**:
+  ```powershell
+  npm run server
+  ```
+* **Terminal 2 (React Frontend)**:
+  ```powershell
+  npm run dev
+  ```
+
+> Open your browser and navigate to: **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+### Method B: FastAPI Python Backend & Core Engine
+
+To start the FastAPI REST API server:
+
 ```powershell
 python -m uvicorn backend.src.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-* Output in console will display:
-  ```
-  INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-  INFO:     Started reloader process
-  INFO:     Started server process
-  INFO:     Application startup complete.
-  ```
+> Open your browser and navigate to: **[http://127.0.0.1:8000](http://127.0.0.1:8000)** (or Swagger Docs at **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**)
 
 ---
 
-## 3. Accessing Web Endpoints
+## 3. Web Endpoints & Access URLs
 
-Once the server is running, open your browser:
-
-| Interface | URL | Purpose |
-| :--- | :--- | :--- |
-| **Interactive Web Application** | [http://127.0.0.1:8000](http://127.0.0.1:8000) | Full customer-facing reservation UI |
-| **Interactive API Documentation** | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) | Swagger UI for executing and testing REST endpoints |
-| **Alternative API Reference** | [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc) | Clean ReDoc OpenAPI documentation |
+| Application / Service | URL | Technology | Description |
+| :--- | :--- | :--- | :--- |
+| **IRCTC Connect Web Portal** | [http://localhost:5173](http://localhost:5173) | React 19 + Tailwind | Complete interactive booking UI |
+| **Email & Hash DB Server** | [http://localhost:5000](http://localhost:5000) | Express.js | Ticket hashing & real inbox delivery |
+| **FastAPI REST API Gateway** | [http://127.0.0.1:8000](http://127.0.0.1:8000) | FastAPI | Core academic REST API & Static UI |
+| **Interactive Swagger API Docs** | [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) | OpenAPI / Swagger | Interactive endpoint execution |
+| **ReDoc API Documentation** | [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc) | ReDoc | Clean schema & data models |
 
 ---
 
 ## 4. Running the Automated Test Suite (84/84 Tests)
 
-The project includes an exhaustive automated test suite using `pytest`. All 84 test cases execute in under 1 second with a **100% pass rate**.
+To execute all **84 automated tests** across all 4 student modules:
 
-### Execute All 84 Tests:
 ```powershell
 python -m pytest backend/tests/ -v
 ```
 
-### Run Tests by Subsystem Module:
-
-1. **Sabbir's Module** (Train Service & Route Search - 17 Tests):
-   ```powershell
-   python -m pytest backend/tests/test_train_service.py -v
-   ```
-
-2. **Samvit's Module** (Seat Engine, 2D Coach & Concurrency - 17 Tests):
-   ```powershell
-   python -m pytest backend/tests/test_seat_engine.py -v
-   ```
-
-3. **Vinayak's Module** (Fare Calculation, Concessions & Tax Invoices - 18 Tests):
-   ```powershell
-   python -m pytest backend/tests/test_fare_calculator.py -v
-   ```
-
-4. **Rahul's Module** (Booking Lifecycle, PNR & Cascade Auto-Promotion - 10 Tests):
-   ```powershell
-   python -m pytest backend/tests/test_booking_lifecycle.py -v
-   ```
-
-5. **Full-Stack API Integration Tests** (FastAPI TestClient - 22 Tests):
-   ```powershell
-   python -m pytest backend/tests/test_api_endpoints.py -v
-   ```
+### Module Test Breakdown:
+* **Train Catalog & Routes (Sabbir - 17 Tests)**:
+  ```powershell
+  python -m pytest backend/tests/test_train_service.py -v
+  ```
+* **Seat Allocation & Concurrency Locks (Samvit - 17 Tests)**:
+  ```powershell
+  python -m pytest backend/tests/test_seat_engine.py -v
+  ```
+* **CRIS Fare Engine & Tax Invoices (Vinayak - 18 Tests)**:
+  ```powershell
+  python -m pytest backend/tests/test_fare_calculator.py -v
+  ```
+* **Booking Lifecycle & Cascade Promotion (Rahul - 10 Tests)**:
+  ```powershell
+  python -m pytest backend/tests/test_booking_lifecycle.py -v
+  ```
+* **API Integration Tests (22 Tests)**:
+  ```powershell
+  python -m pytest backend/tests/test_api_endpoints.py -v
+  ```
 
 ---
 
-## 5. End-to-End Feature Tour & Testing Guide
+## 5. Feature Guide & Capabilities
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser and test the following complete workflow:
+### 1. Interactive Train Search Engine
+* Search between major junctions (NDLS, MMCT, CSMT, HWH, MAS, SBC, BSB, JP, GOA, etc.) with autocomplete.
+* Class selection (CC / 3A / 2A / 1A / EC / SL).
+* Quota selection: General, Tatkal, Premium Tatkal, Ladies, and Senior Citizen lower berth.
 
-### Step 1: Train Search & Station Lookup (Sabbir)
-* In the **From Station** dropdown, select `KSR Bengaluru City (SBC)`.
-* In the **To Station** dropdown, select `MGR Chennai Central (MAS)`.
-* Pick any travel date (e.g. `2026-11-09`).
-* Click **Find Trains**.
-* Search returns bidirectional express trains: **12658 (Chennai Mail)** and **12028 (Shatabdi Express)**.
+### 2. Live Satellite Radar & Train Tracking
+* Real-time GPS coordinates, speed (km/h), and approaching halt powered by the `RailRadar API`.
+* Interactive delay indicators and timetable tracking.
 
-### Step 2: Station Infrastructure & Amenities Modal (Sabbir)
-* On the train card, click on any station code link (e.g. `SBC ℹ️` or `MAS ℹ️`).
-* A modal opens displaying real station amenities: Platform count, Wi-Fi status, Retiring rooms, Wheelchair accessibility, Cloak rooms, and Food courts.
+### 3. Interactive Coach & Berth Selector
+* Realistic visual layout for selecting specific berths: Window Seat (WS), Lower Berth (LB), Middle Berth (MB), Upper Berth (UB), Side Lower (SL), and Side Upper (SU).
+* Priority allocation of lower berths for senior citizen passengers.
+* IRCTC Onboard Catering selection: Pure Veg, Non-Veg, Jain Satvik, or No Meal.
 
-### Step 3: Live Satellite GPS Radar Modal (Sabbir)
-* Click **[ 🛰️ Live Radar ]** on any train card.
-* A live radar modal opens simulating NTES satellite telemetry with speed (km/h), GPS coordinates (latitude/longitude), heading, approaching halt, and green signal status.
+### 4. Cryptographic SHA-256 E-Ticket Verification
+* Every booked ticket generates a tamper-proof SHA-256 cryptographic hash.
+* Hashed records are stored in `data/railway.db` and verified on demand.
 
-### Step 4: Live Station Running Status & Delay Timetable (Sabbir)
-* Click **[ ⏱️ Delays ]** on any train card.
-* Displays intermediate station halts, scheduled departure, platform numbers, dynamic delay minutes, and status (`DEPARTED`, `ARRIVED`, `UPCOMING`).
-
-### Step 5: 2D Interactive Coach Visualizer & Seat Locking (Samvit)
-* Click **[ 💺 2D Coach ]** or navigate to the **2D Coach Visualizer** tab.
-* Select a coach class (`3A`, `2A`, `1A`, `SL`, or `CC`).
-* Click any green seat to lock it.
-* A 5-minute countdown timer appears. You can renew the lock via heartbeat or explicitly click **[ ✕ Release Lock ]** to make it available again.
-
-### Step 6: Coach Occupancy & Capacity Utilization Radar (Samvit)
-* Click **[ 📊 Occupancy ]** on a train card.
-* Displays class-by-class capacity breakdown, available seats, locked seats, confirmed seats, RAC count, waiting list count, and visual percentage progress bars.
-
-### Step 7: Booking with Concessions & Dynamic Surcharges (Vinayak & Rahul)
-* Click **Book Now** on your desired travel class.
-* Add passenger names, ages, and genders.
-* Choose concessions:
-  - `SENIOR_CITIZEN_MALE` (40% discount)
-  - `SENIOR_CITIZEN_FEMALE` (50% discount)
-  - `DIVYANGJAN` (75% discount)
-  - `ARMED_FORCES` (50% defense concession)
-  - `CHILD_5_11` (50% child fare policy)
-  - `INFANT_UNDER_5` (100% free infant policy)
-* Select Quota (`GENERAL` or `TATKAL` premium).
-* Click **Proceed to Booking**, choose Payment Method (`UPI`, `Card`, `Net Banking`), and click **Authorize & Book Ticket**.
-
-### Step 8: View Confirmed 10-Digit PNR & E-Ticket (Rahul)
-* The system instantly generates a unique 10-digit PNR (e.g. `4829104812`).
-* Displays allocated Coach, Seat Number, Berth Type (`Lower`, `Middle`, `Upper`, `Side Lower`), and Transaction ID.
-
-### Step 9: Official CRIS GST Tax Invoice with SAC 9964 (Vinayak)
-* On the confirmed ticket, click **[ 🧾 View GST Tax Invoice ]**.
-* Opens an itemized official tax invoice complying with Indian Railway CRIS standards:
-  - SAC Code: `9964` (Passenger transport by railways)
-  - CRIS GSTIN: `29AAACR1234F1Z5`
-  - 5% GST breakdown (2.5% CGST + 2.5% SGST) for AC classes, 0% GST exemption for Sleeper
-  - IRCTC convenience fee (₹15 + 18% GST) & optional travel insurance (₹0.35/pax)
-  - One-click print/save receipt functionality.
-
-### Step 10: Cancellation & Automatic Cascading Promotion (Vinayak & Rahul)
-* Click **[ ✕ Cancel Ticket & Claim Refund ]**.
-* An interactive cancellation timeframe preview allows selecting cancellation notice:
-  - `>48 hours` (Flat clerkage fee)
-  - `48 to 12 hours` (25% deduction)
-  - `12 to 4 hours` (50% deduction)
-  - `<4 hours` (0% refund)
-* Confirm cancellation: The booking status updates to `CANCELLED`, refund is processed, and any existing RAC passengers in the queue are **automatically promoted to Confirmed (CNF)** with re-indexed queue positions.
+### 5. Email Confirmation & Printable PDF Ticket
+* Real inbox e-ticket delivery powered by Resend API and Gmail SMTP.
+* Direct in-browser PDF Electronic Reservation Slip (ERS) generation with QR code for TTE verification.
 
 ---
 
 ## 6. Team Member Ownership & Contributions
 
-| Member | Student ID / GitHub | Subsystem Responsibility | Deliverables Completed | Automated Tests |
-| :--- | :--- | :--- | :--- | :---: |
-| **Sabbir Mondal** | `SabbirMondal314159` | **Train Catalog & Railway API** | • 6 Junction Terminals & 6 Return Train Pairs<br>• Station Facilities & Amenities Directory<br>• Live GPS Satellite Telemetry<br>• NTES Live Running Delays & Platforms | **17 Tests**<br>(100% Pass) |
-| **Samvit Atur** | `samvitOK` | **Seat Layout & Concurrency Locks** | • 2D Coach Berth Visualizer (SL, 3A, 2A, 1A, CC)<br>• 5-minute High-Concurrency Seat Locking<br>• Lock Heartbeat Renewal & Explicit Release<br>• Contiguous Bay/Cabin Family Allocations<br>• Coach Occupancy & Capacity Utilization Radar | **17 Tests**<br>(100% Pass) |
-| **Vinayak Kalal** | `kalalvinayak23` | **CRIS Dynamic Fare Engine** | • Distance Tariff Calculation with 5% GST<br>• Concessions: Senior Citizen, Divyangjan, Defense, Child, Infant<br>• Holiday Dynamic Surge Pricing Calendar<br>• Standard 4-Tier Cancellation Refund Matrix<br>• CRIS GST Tax Invoices (SAC 9964) with CGST/SGST | **18 Tests**<br>(100% Pass) |
-| **Rahul Shenoy** | `rahulsheno` | **Booking Lifecycle & Full-Stack Lead** | • 10-Digit PNR State Machine & Ticket Store<br>• Cascading Auto-Promotion (RAC->CNF, WL->RAC)<br>• Unified FastAPI Server with CORS & Static Mount<br>• Interactive Single-Page UI with 8 Modal Dialogs<br>• GitHub Actions CI/CD Pipeline | **32 Tests**<br>(100% Pass) |
+| Member | Student ID / GitHub | Subsystem Responsibility | Key Technical Deliverables |
+| :--- | :--- | :--- | :--- |
+| **Sabbir Mondal** | `SabbirMondal314159` | **Train Catalog & Live Services** | Train search graph, station amenities directory, live GPS satellite telemetry, timetable delay tracking. |
+| **Samvit Atur** | `samvitOK` | **Seat Engine & Concurrency** | 2D coach visualizer, 5-minute concurrency seat locks, heartbeat renewals, coach occupancy radar. |
+| **Vinayak Kalal** | `kalalvinayak23` | **CRIS Dynamic Fare Engine** | Distance tariffs, 5 concession policies, festival surge pricing, 4-tier refund matrix, GST tax invoices (SAC 9964). |
+| **Rahul Shenoy** | `rahulsheno` | **Booking Lifecycle & Full-Stack Lead** | 10-digit PNR state machine, cascading RAC/WL auto-promotion, unified API gateway, CI/CD pipeline, and system integration. |
 
 ---
 
-## 7. Project Structure & Architecture
+## 7. Project Directory Architecture
 
 ```
-74_JACKFRUIT--SE-MINI-Railway-Reservation-System/
-├── backend/
-│   ├── src/
-│   │   ├── main.py                     # Unified FastAPI server & routes
-│   │   ├── train_service/              # [Sabbir] Train search, routes, external API mock
-│   │   ├── seat_engine/                # [Samvit] Coach 2D layout, locks, family allocator
-│   │   ├── fare_calculator/            # [Vinayak] CRIS distance tariff, concessions, GST
-│   │   ├── booking_lifecycle/          # [Rahul] 10-digit PNR, auto-promotion cascade
-│   │   └── database/                   # Seed data & in-memory store
-│   └── tests/
-│       ├── test_train_service.py       # [Sabbir] 17 Unit tests
-│       ├── test_seat_engine.py         # [Samvit] 17 Unit tests
-│       ├── test_fare_calculator.py     # [Vinayak] 18 Unit tests
-│       ├── test_booking_lifecycle.py   # [Rahul] 10 Unit tests
-│       └── test_api_endpoints.py       # [Full-Stack] 22 REST API Integration Tests
-├── frontend/                           # Responsive Interactive UI
-│   ├── index.html                      # HTML with 8 modal dialogs
-│   ├── app.js                          # REST API client & view controller
-│   └── styles.css                      # Modern responsive styling
+Railway Reservation System/
+├── src/                                # React 19 Frontend Components
+│   ├── components/                     # HeroSearch, BookingModal, ETicketModal, SeatSelectorModal, etc.
+│   ├── context/                        # Auth & Language Contexts
+│   ├── services/                       # RailRadar, Email, Govt ID Validator, Train Engine
+│   ├── data/                           # IRCTC static timetables & multilingual data
+│   ├── App.jsx                         # Main React application controller
+│   └── main.jsx                        # React root entry
+├── public/                             # Static public assets & destination images
+├── server/                             # Node backend services
+│   └── hashDb.js                       # Cryptographic SHA-256 ticket database service
+├── data/                               # Persistence store
+│   └── railway.db                      # SQLite 3 ACID relational & hash ledger
+├── backend/                            # Python FastAPI Backend
+│   ├── src/                            # 4 Subsystems (Train, Seat, Fare, Booking)
+│   └── tests/                          # 84 Automated pytest unit and integration tests
 ├── docs/                               # SE Course Deliverables
-│   ├── 01_SYNOPSIS.md                  # Project scope & synopsis
-│   ├── 02_SRS_DOCUMENT.md              # IEEE 830 SRS document
-│   ├── 03_ARCHITECTURE_DESIGN.md       # Architecture & C4 diagrams
-│   ├── 04_TEST_PLAN_SPECIFICATION.md   # 84-Test traceability matrix
-│   ├── 05_SPRINT_1_REVIEW_AND_SIGNOFF.md # Formal Sprint 1 sign-off report
-│   └── jira_import_ready.csv           # 1-click Jira bulk-import template
-├── scripts/                            # Automation tooling
-│   └── generate_jira_csv.py            # Jira CSV generator
-├── .github/workflows/ci.yml            # CI/CD automated test pipeline
-├── Dockerfile & docker-compose.yml     # Containerization setup
+│   ├── 01_SYNOPSIS.md
+│   ├── 02_SRS_DOCUMENT.md
+│   ├── 03_ARCHITECTURE_DESIGN.md
+│   ├── 04_TEST_PLAN_SPECIFICATION.md
+│   ├── 05_SPRINT_1_REVIEW_AND_SIGNOFF.md
+│   └── jira_import_ready.csv
+├── server.js                           # Express.js Email & Ticket Verification Server
+├── vite.config.js                      # Vite frontend bundler config
+├── package.json                        # Node.js dependencies & scripts
 ├── requirements.txt                    # Python dependencies
-└── README.md                           # GitHub repository overview
+└── gemini.md                           # Operational Execution Manual
 ```
-
----
-
-## 8. Sprint 1 Sign-Off & Sprint 2 Notice
-
-* **Sprint 1 Code Freeze**: Effective as of commit `e4679b7` with Git tag `v1.0.0-sprint1`.
-* **Lock Status**: **No code commits** will take place until the team convenes for Sprint 2 on **Wednesday, 07-11-2026**.
-* **Sprint 2 Target Goals**:
-  1. Persistent Database Layer (SQLite/PostgreSQL with SQLAlchemy & Alembic migrations).
-  2. WebSocket Live Telemetry for real-time train movement and push alerts for RAC-to-CNF confirmations.
-  3. Payment Gateway Webhook integration for simulated UPI/Card settlement callbacks.
-  4. Station Master / Administrative Management Console.
