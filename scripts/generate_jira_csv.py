@@ -1,143 +1,85 @@
 import csv
-from backend.src.database.seed_data import TRAINS
 
-# Standard Jira CSV Import format
+# Jira CSV format for Sprint 2 Backlog
 JIRA_CSV_HEADER = [
     "Issue Type", "Issue key", "Summary", "Description", "Assignee",
-    "Reporter", "Story Points", "Status", "Resolution", "Epic Name"
+    "Reporter", "Story Points", "Status", "Resolution", "Sprint", "Epic Name"
 ]
 
-ISSUES = [
-    # Sabbir (RRS-1 to RRS-4)
+ISSUES_SPRINT_2 = [
+    # Sabbir Mondal (Train Catalog & Live Services)
     {
-        "type": "Story", "key": "RRS-1",
-        "summary": "Train search by station and travel date with directional check",
-        "desc": "Implement station-to-station route search with directional traversal validation and day-of-run calendar filtering.",
+        "type": "Story", "key": "RRS-17",
+        "summary": "Local timezone scheduling and Indian Standard Time date handler",
+        "desc": "Implement timezone-aware local date utility (getLocalDateString) across train search, departure dates, and timetable queries, resolving UTC midnight shift anomalies.",
         "assignee": "fakesabm@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Train Catalog"
+        "points": "3", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Train Catalog"
     },
     {
-        "type": "Story", "key": "RRS-2",
-        "summary": "Station graph, intermediate halt schedule and distance query",
-        "desc": "Build railway station directory graph, inter-station distance calculation, and timetable inspection.",
+        "type": "Story", "key": "RRS-18",
+        "summary": "Live GPS train radar telemetry and real-time delay tracking integration",
+        "desc": "Integrate real-time Indian Railways satellite telemetry via RailRadar API, displaying live train speed, geographical coordinates, approaching halts, and delay indicators.",
         "assignee": "fakesabm@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Train Catalog"
-    },
-    {
-        "type": "Story", "key": "RRS-3",
-        "summary": "External Railway API live status simulation and caching",
-        "desc": "Simulate CRIS/NTES live GPS train status with in-memory caching and error handling.",
-        "assignee": "fakesabm@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Train Catalog"
-    },
-    {
-        "type": "Story", "key": "RRS-4",
-        "summary": "Unit tests for train catalog and route search (10/10)",
-        "desc": "Automated pytest suite TC_SABBIR_01 to TC_SABBIR_10 achieving 100% pass rate.",
-        "assignee": "fakesabm@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "2", "status": "Done", "resolution": "Done", "epic": "Testing"
+        "points": "5", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Train Catalog"
     },
 
-    # Samvit (RRS-5 to RRS-8)
+    # Samvit Atur (Seat Engine & Concurrency)
     {
-        "type": "Story", "key": "RRS-5",
-        "summary": "Interactive 2D coach visualizer (1A, 2A, 3A, SL)",
-        "desc": "Generate real-time 2D berth layouts with Lower, Middle, Upper, Side Lower, and Side Upper indicators.",
+        "type": "Story", "key": "RRS-19",
+        "summary": "Interactive 2D coach visualizer with authentic IRCTC berth layouts",
+        "desc": "Develop visual 2D interactive coach visualizer for AC Executive, 1A, 2A, 3A, and Sleeper coaches with Lower, Middle, Upper, Side Lower, and Window berth selectors.",
         "assignee": "samvitaturbtw@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Seat Engine"
+        "points": "5", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Seat Engine"
     },
     {
-        "type": "Story", "key": "RRS-6",
-        "summary": "Berth preference auto-allocation (Lower/Upper/Middle)",
-        "desc": "Implement auto-allocation logic prioritizing Lower berths for senior citizens with fallback.",
+        "type": "Story", "key": "RRS-20",
+        "summary": "Lower berth priority allocation for senior citizens and onboard meal selector",
+        "desc": "Implement auto-prioritization of lower berths for senior citizens (60+) and female passengers along with onboard IRCTC catering choices (Veg, Non-Veg, Jain).",
         "assignee": "samvitaturbtw@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Seat Engine"
-    },
-    {
-        "type": "Story", "key": "RRS-7",
-        "summary": "5-minute atomic concurrency seat locking mechanism",
-        "desc": "Prevent race conditions and double-bookings with 300s atomic checkout locks and timeout cleanup.",
-        "assignee": "samvitaturbtw@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "5", "status": "Done", "resolution": "Done", "epic": "Seat Engine"
-    },
-    {
-        "type": "Story", "key": "RRS-8",
-        "summary": "Unit tests for coach layout and seat locking (10/10)",
-        "desc": "Automated pytest suite TC_SAMVIT_01 to TC_SAMVIT_10 testing concurrency locks and allocation.",
-        "assignee": "samvitaturbtw@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "2", "status": "Done", "resolution": "Done", "epic": "Testing"
+        "points": "3", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Seat Engine"
     },
 
-    # Vinayak (RRS-9 to RRS-12)
+    # Vinayak Kalal (CRIS Dynamic Fare Engine)
     {
-        "type": "Story", "key": "RRS-9",
-        "summary": "Dynamic distance-based base fare computation + 5% GST",
-        "desc": "Compute base fare using distance and class rate per km with minimum thresholds and 5% GST.",
+        "type": "Story", "key": "RRS-21",
+        "summary": "Automated live departure countdown timer and IRCTC tiered refund engine",
+        "desc": "Implement live PRS departure countdown timer automatically determining IRCTC cancellation deduction tiers (>48h flat clerkage, 48-12h 25%, 12-4h 50%, <4h 100%) with instant net refund computation.",
         "assignee": "kalalvinayak23@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Fare Engine"
+        "points": "5", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Fare Engine"
     },
     {
-        "type": "Story", "key": "RRS-10",
-        "summary": "Concession policies (Senior Citizen, Student, Divyangjan)",
-        "desc": "Statutory concession rules: Senior Citizen (40-50%), Student (50%), Divyangjan (75%).",
+        "type": "Story", "key": "RRS-22",
+        "summary": "Cryptographic cancellation audit logging and refund reference generation",
+        "desc": "Build backend cancellation transaction handler generating unique refund tracking references (CRIS-RFND-XXXXXX) and logging cancellation deductions into the SQLite ledger.",
         "assignee": "kalalvinayak23@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Fare Engine"
-    },
-    {
-        "type": "Story", "key": "RRS-11",
-        "summary": "IRCTC tiered cancellation refund matrix and payment simulation",
-        "desc": "Compute cancellation deductions based on time before departure (>48h, 48-12h, 12-4h, <4h).",
-        "assignee": "kalalvinayak23@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Fare Engine"
-    },
-    {
-        "type": "Story", "key": "RRS-12",
-        "summary": "Unit tests for fare calculations and concessions (10/10)",
-        "desc": "Automated pytest suite TC_VINAYAK_01 to TC_VINAYAK_10 covering refunds, fares, and boundaries.",
-        "assignee": "kalalvinayak23@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "2", "status": "Done", "resolution": "Done", "epic": "Testing"
+        "points": "5", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Fare Engine"
     },
 
-    # Rahul (RRS-13 to RRS-16)
+    # Rahul Shenoy (Booking Lifecycle & Full-Stack Lead)
     {
-        "type": "Story", "key": "RRS-13",
-        "summary": "10-digit CRIS-compliant PNR generation and status tracker",
-        "desc": "Generate unique 10-digit PNRs and provide real-time status tracking.",
+        "type": "Story", "key": "RRS-23",
+        "summary": "ACID-compliant SQLite 3 relational database and dual-layer backend persistence",
+        "desc": "Engineer relational SQLite 3 database (railway.db) with SQLAlchemy declarative models (StationModel, TrainModel, BookingModel, CancellationModel) and native Node.js 22 SQLite driver.",
         "assignee": "rahulshenoy0000@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "5", "status": "Done", "resolution": "Done", "epic": "Booking Lifecycle"
+        "points": "5", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Core Architecture"
     },
     {
-        "type": "Story", "key": "RRS-14",
-        "summary": "Cascade auto-promotion engine (WL -> RAC -> Confirmed)",
-        "desc": "Automatically promote RAC passengers to Confirmed and WL passengers to RAC upon cancellation.",
+        "type": "Story", "key": "RRS-24",
+        "summary": "Client-server dual-layer persistence and browser refresh state synchronization",
+        "desc": "Implement dual-layer persistence combining browser localStorage with backend SQLite sync (/api/db/tickets), ensuring booked tickets and cancellation statuses persist across page reloads.",
         "assignee": "rahulshenoy0000@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "5", "status": "Done", "resolution": "Done", "epic": "Booking Lifecycle"
-    },
-    {
-        "type": "Story", "key": "RRS-15",
-        "summary": "Unified FastAPI server and interactive web frontend",
-        "desc": "FastAPI REST API layer connecting all 4 domain services with responsive web UI.",
-        "assignee": "rahulshenoy0000@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "Core Architecture"
-    },
-    {
-        "type": "Story", "key": "RRS-16",
-        "summary": "CI/CD GitHub Actions, Docker container, and SDLC docs",
-        "desc": "GitHub Actions automated test pipeline, Docker configuration, and IEEE standard SDLC documentation.",
-        "assignee": "rahulshenoy0000@gmail.com", "reporter": "rahulshenoy0000@gmail.com",
-        "points": "3", "status": "Done", "resolution": "Done", "epic": "DevOps & SDLC"
+        "points": "5", "status": "To Do", "resolution": "", "sprint": "Sprint 2", "epic": "Core Architecture"
     }
 ]
 
 with open("docs/jira_import_ready.csv", "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f)
     writer.writerow(JIRA_CSV_HEADER)
-    for issue in ISSUES:
+    for issue in ISSUES_SPRINT_2:
         writer.writerow([
             issue["type"], issue["key"], issue["summary"], issue["desc"],
             issue["assignee"], issue["reporter"], issue["points"],
-            issue["status"], issue["resolution"], issue["epic"]
+            issue["status"], issue["resolution"], issue["sprint"], issue["epic"]
         ])
 
-print("Jira CSV file generated successfully: docs/jira_import_ready.csv")
-
+print("Sprint 2 Jira CSV successfully generated: docs/jira_import_ready.csv")

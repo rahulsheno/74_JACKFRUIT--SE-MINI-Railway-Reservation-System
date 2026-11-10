@@ -1,80 +1,61 @@
-# 🚆 Railway Ticket Reservation System (RRS)
-**Course**: UE24CS341A - Software Engineering Mini-Project (2026)  
-**Topic 74**: Railway Reservation System  
-**Repository**: [rahulsheno/74_JACKFRUIT--SE-MINI-Railway-Reservation-System](https://github.com/rahulsheno/74_JACKFRUIT--SE-MINI-Railway-Reservation-System)
+# IRCTC Connect — Indian Railways Train Ticketing Portal
 
----
-
-## 👥 Team Members & Functional Ownership Matrix
-
-| Member | Name & GitHub | Module & Ownership | Key Responsibilities |
-| :--- | :--- | :--- | :--- |
-| **Member 1** | **Sabbir Mondal** (`SabbirMondal314159`) | **Train Catalog, Routes & Railway API Integration** | Train search by stations & date, live schedule lookup, station routes graph, external Railway API simulation & caching |
-| **Member 2** | **Samvit Atur** (`samvitOK`) | **Seat Layout Engine, Allocation & Concurrency Lock** | 2D coach berth layout (1A, 2A, 3A, SL), berth preferences, 5-minute atomic seat locking, RAC/WL queuing |
-| **Member 3** | **Vinayak Kalal** (`kalalvinayak23`) | **Fare Calculation Engine, Concessions & Payments** | Dynamic base fare by distance/class, Senior Citizen/Student/Divyangjan concessions, Tatkal surcharges, payment simulation |
-| **Member 4 (Lead)** | **Rahul Shenoy** (`rahulsheno`) | **Booking Lifecycle, PNR Engine, Cascade Cancellation** | User JWT Auth, 10-digit PNR tracker, cancellation with automatic promotion cascade (WL -> RAC -> CNF), CI/CD & Docker |
-
----
-
-## 🏗️ Architecture & Modules
-
-```
-railway-reservation-system/
-├── backend/
-│   ├── src/
-│   │   ├── main.py                     # Unified FastAPI application entrypoint
-│   │   ├── train_service/              # [Sabbir] Train search, routes, external API mock
-│   │   ├── seat_engine/                # [Samvit] Coach layouts, berth allocation, locks
-│   │   ├── fare_calculator/            # [Vinayak] Fare engine, concessions, refund rules
-│   │   ├── booking_lifecycle/          # [Rahul] PNR generation, cancellation, JWT auth
-│   │   └── database/                   # Seed data & in-memory/JSON store
-│   └── tests/
-│       ├── test_train_service.py       # [Sabbir] 17 Unit tests (Routes, Stations, GPS & Running Status)
-│       ├── test_seat_engine.py         # [Samvit] 17 Unit tests (Coach maps, Locking & Occupancy Radar)
-│       ├── test_fare_calculator.py     # [Vinayak] 18 Unit tests (Tariff, Concessions, GST & Invoices)
-│       ├── test_booking_lifecycle.py   # [Rahul] 10 Unit tests (PNR tracker & Cascade Promotion)
-│       └── test_api_endpoints.py       # [Full-Stack] 22 REST API Integration Tests
-├── frontend/                           # Responsive Interactive UI
-│   ├── index.html
-│   ├── app.js
-│   └── styles.css
-├── docs/                               # SE Course Deliverables
-│   ├── 01_SYNOPSIS.md
-│   ├── 02_SRS_DOCUMENT.md
-│   ├── 03_ARCHITECTURE_DESIGN.md
-│   ├── 04_TEST_PLAN_SPECIFICATION.md
-│   └── 05_SPRINT_1_REVIEW_AND_SIGNOFF.md
-├── scripts/                            # DevOps & Tooling Automation
-│   └── generate_jira_csv.py
-├── .github/workflows/ci.yml            # CI/CD Automated Test Pipeline
-├── Dockerfile & docker-compose.yml
-└── requirements.txt
-```
+A modern, high-speed, and responsive train ticket booking web application for **Indian Railways & IRCTC**, featuring Vande Bharat Express, Rajdhani, Shatabdi, Duronto, and Superfast express trains.
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Run with Python
-```bash
-python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
+### Prerequisites
+* Node.js (v18 or higher)
+* npm
 
-pip install -r requirements.txt
-uvicorn backend.src.main:app --reload --port 8000
+### Running Locally
+```bash
+npm install
+npm run dev
 ```
-Open **http://localhost:8000** in your browser to view the interactive UI, or **http://localhost:8000/docs** for the interactive Swagger API documentation.
+Open [http://localhost:5173/](http://localhost:5173/) in your browser.
 
-### 2. Run with Docker
+### Building for Production
 ```bash
-docker compose up --build
+npm run build
 ```
 
-### 3. Run Tests with Coverage
-```bash
-pytest --cov=backend/src --cov-report=term-missing --cov-fail-under=80
-```
+---
 
+## 🚆 Features Implemented
+
+* **Authentic Rail Design System**:
+  - Deep Navy header (`#0f172a`), signature rail teal (`#00a3a6`), and high-contrast typography.
+  - Official brand color schemes for Vande Bharat, Rajdhani, Shatabdi, Tejas, Duronto, and Humsafar.
+
+* **Interactive Train Search Engine**:
+  - Origin & Destination station search with autocomplete covering major Indian railway junctions (NDLS, MMCT, CSMT, HWH, MAS, SBC, BSB, JP, GOA, etc.).
+  - One-way & Round trip options.
+  - Date of journey selection with quick shortcuts (Today, Tomorrow, Next Week).
+  - Passenger configuration (Adults, Children, Senior Citizens).
+  - IRCTC Booking Quotas (General, Tatkal, Premium Tatkal, Ladies, Senior Citizen lower berth).
+  - Travel class selection (CC / 3A vs EC / 2A / 1A).
+
+* **Live Train Search Results & Timetables**:
+  - Real-time scheduled departures simulated with accurate duration, departure/arrival times, and platform numbers.
+  - Filter by train category (All, Vande Bharat, Rajdhani, Shatabdi, Duronto).
+  - Sort by earliest departure, lowest fare, or fastest duration.
+  - Authentic Indian Railways electric traction CO₂ emissions savings compared to road and flight.
+
+* **Seat & Berth Selection Modal**:
+  - Berth preferences: Window Seat (WS), Lower Berth (LB), Upper Berth (UB), Side Lower (SL).
+  - IRCTC onboard catering preferences: Pure Vegetarian Thali, Non-Vegetarian, Jain Satvik Meal, or No Meal.
+  - Senior citizen lower berth allocation priority.
+
+* **Seamless Passenger Booking & E-Ticket Generation**:
+  - Passenger details form with Government ID verification (Aadhaar, PAN, Passport, Voter ID).
+  - Optional add-ons: IRCTC Comprehensive Travel Insurance (₹0.45), Hot Pantry Meal (₹180), and fresh bedroll linen kit.
+  - Realistic 10-digit PNR generation (e.g. `248-8193421`).
+  - **Electronic Reservation Slip (ERS)**: Printable e-ticket modal with QR code for TTE verification, train details, and Indian Railways 24x7 Helpline `139`.
+
+* **Explore India & Top Destinations**:
+  - Filterable by region: North & Central India, South & Western India, East & Northeast India.
+  - Popular rail corridors with direct booking shortcuts.
+  - Official IRCTC FAQ accordion addressing Tatkal rules, booking advance periods (ARP 120 days), and PNR status.
