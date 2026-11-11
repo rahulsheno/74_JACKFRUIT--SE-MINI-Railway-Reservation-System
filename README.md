@@ -186,6 +186,7 @@ flowchart TD
 
 ## Repository structure
 
+```text
 74_JACKFRUIT--SE-MINI-Railway-Reservation-System/
 ├── .github/workflows/ci.yml
 ├── backend/
@@ -201,10 +202,13 @@ flowchart TD
 │   │   ├── train_service/
 │   │   └── main.py
 │   └── tests/
+├── data/
+│   └── railway.db
 ├── public/
 │   ├── destinations/
 │   └── train-logo-centered.png
-├── scripts/generate_jira_csv.py
+├── scripts/
+│   └── generate_jira_csv.py
 ├── server/
 │   ├── hashDb.js
 │   └── sqliteDb.js
@@ -217,7 +221,7 @@ flowchart TD
 │   ├── App.jsx
 │   ├── index.css
 │   └── main.jsx
-├── .env
+├── .env.example
 ├── .gitignore
 ├── Dockerfile
 ├── docker-compose.yml
@@ -229,6 +233,7 @@ flowchart TD
 ├── tailwind.config.js
 ├── vite.config.js
 └── README.md
+```
 
 ---
 
