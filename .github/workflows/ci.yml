@@ -2,9 +2,10 @@ name: CI Test & Coverage Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, "feature/**" ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -24,12 +25,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Pytest with Branch Coverage
+        env:
+          PYTHONPATH: .
         run: |
-          pytest --cov=backend/src --cov-report=term --cov-report=html:htmlcov --cov-fail-under=80
+          python -m pytest backend/tests/ --cov=backend/src --cov-report=term --cov-report=html:htmlcov --cov-fail-under=80
 
       - name: Upload Coverage Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: htmlcov/
-
