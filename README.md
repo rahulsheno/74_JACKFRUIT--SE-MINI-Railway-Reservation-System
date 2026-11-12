@@ -1,5 +1,11 @@
 # Railway Reservation System — IRCTC Connect
 
+[![CI Test & Coverage Pipeline](https://github.com/rahulsheno/74_JACKFRUIT--SE-MINI-Railway-Reservation-System/actions/workflows/ci.yml/badge.svg)](https://github.com/rahulsheno/74_JACKFRUIT--SE-MINI-Railway-Reservation-System/actions/workflows/ci.yml)
+[![Branch Coverage](https://img.shields.io/badge/Coverage-90.29%25-brightgreen.svg)](https://github.com/rahulsheno/74_JACKFRUIT--SE-MINI-Railway-Reservation-System/actions/workflows/ci.yml)
+[![Automated Tests](https://img.shields.io/badge/Tests-84%2F84%20Passed-success.svg)](https://github.com/rahulsheno/74_JACKFRUIT--SE-MINI-Railway-Reservation-System/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A full-stack railway reservation application developed as a Software Engineering mini-project (Topic 74 — Jackfruit). The project demonstrates train discovery, route search, berth allocation, temporary seat locking, fare calculation, passenger booking, PNR lookup, cancellation, and RAC/wait-list promotion through a modular REST backend and browser-based frontend.
 
 > **Project scope:** This is an academic demonstration system. Railway schedules, fares, concessions, running status, GPS telemetry, payments, and PNRs are locally modelled or simulated. It is not an official IRCTC service and does not issue valid Indian Railways tickets.
