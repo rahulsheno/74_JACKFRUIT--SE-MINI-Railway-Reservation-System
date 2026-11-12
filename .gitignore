@@ -45,6 +45,9 @@ Thumbs.db
 .env
 .env.local
 
+# Node.js
+node_modules/
+dist/
+
 # Project guidelines & office docs
 *.docx
-
