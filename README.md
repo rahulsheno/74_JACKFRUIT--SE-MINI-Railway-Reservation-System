@@ -472,3 +472,20 @@ This repository is an educational prototype. Important limitations to keep in mi
 
 ---
 
+
+
+## Future work & Product Backlog (Post-Sprint 2)
+
+The following future scope items have been logged directly into the [Atlassian Jira Backlog (Project RRS)](https://rahulshenoy0000.atlassian.net/jira/software/c/projects/RRS/boards/1/backlog):
+
+| Issue Key | Future Scope Summary | Domain Subsystem | Assignee | Priority |
+| :--- | :--- | :--- | :--- | :--- |
+| **[RRS-26](https://rahulshenoy0000.atlassian.net/browse/RRS-26)** | Production Kubernetes & Docker Swarm Cloud Cluster Deployment | Cloud & DevOps | Rahul Shenoy | High |
+| **[RRS-27](https://rahulshenoy0000.atlassian.net/browse/RRS-27)** | Multi-Modal Journey Planner & Connecting Trains Route Finder | Train Catalog | Sabbir Mondal | Medium |
+| **[RRS-28](https://rahulshenoy0000.atlassian.net/browse/RRS-28)** | Real-Time Webhook Consumer for IRCTC Live NTES Telemetry | Train Catalog | Sabbir Mondal | Medium |
+| **[RRS-29](https://rahulshenoy0000.atlassian.net/browse/RRS-29)** | Distributed Redis Ephemeral Lock & WebSocket Seat Sync | Seat Engine | Samvit Atur | High |
+| **[RRS-30](https://rahulshenoy0000.atlassian.net/browse/RRS-30)** | 3D Coach Virtual Walkthrough with Divyangjan Accessibility Mapping | Seat Engine | Samvit Atur | Medium |
+| **[RRS-31](https://rahulshenoy0000.atlassian.net/browse/RRS-31)** | Unified UPI 2.0 AutoPay & Instant Refund Gateway Integration | Fare Engine | Vinayak Kalal | High |
+| **[RRS-32](https://rahulshenoy0000.atlassian.net/browse/RRS-32)** | Predictive AI Dynamic Pricing & Peak Seasonal Surge Calculator | Fare Engine | Vinayak Kalal | Medium |
+| **[RRS-33](https://rahulshenoy0000.atlassian.net/browse/RRS-33)** | Multi-AZ Cloud PostgreSQL Migration & Redis Read-Replica Sync | Core Arch | Rahul Shenoy | High |
+| **[RRS-34](https://rahulshenoy0000.atlassian.net/browse/RRS-34)** | Automated Multi-Channel Notification Engine (WhatsApp, SMS & Apple PKPass) | Core Arch | Rahul Shenoy | Medium |
